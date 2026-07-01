@@ -190,7 +190,7 @@
   }
 
   /* MAIN */
-  main { padding: 1.8rem 2rem; max-width: 1100px; }
+  main { padding: 0 2rem 2rem; max-width: 1100px; } #main-content { padding-top: 1.6rem; }
 
   .company-panel { display: none; }
   .company-panel.active { display: block; animation: fadeIn 0.2s ease; }
@@ -625,6 +625,98 @@
   body:not(.readonly) #edit-banner { display: block; }
 
   /* RESPONSIVE */
+  /* TRACKER PUBBLICAZIONI */
+  .tracker-section { margin-bottom: 2rem; }
+  .tracker-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;
+  }
+  .tracker-title { font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; }
+  .tracker-month-nav { display: flex; align-items: center; gap: 0.6rem; }
+  .month-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); border-radius: 6px; padding: 0.35rem 0.7rem;
+    cursor: pointer; font-size: 0.78rem; font-weight: 600;
+    font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+  }
+  .month-btn:hover { border-color: var(--company-color); color: var(--company-color); }
+  .month-label { font-size: 0.85rem; font-weight: 600; color: var(--text); min-width: 120px; text-align: center; }
+
+  .tracker-profiles { display: flex; flex-direction: column; gap: 1.2rem; }
+
+  .profile-block {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+  }
+  .profile-block-header {
+    padding: 0.8rem 1.1rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
+  }
+  .profile-name { font-size: 0.88rem; font-weight: 700; }
+  .profile-stats { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+  .profile-stat {
+    font-size: 0.68rem; font-weight: 600; color: var(--muted);
+    background: var(--surface2); border-radius: 20px; padding: 0.2rem 0.6rem;
+  }
+  .profile-stat span { color: var(--company-color); }
+
+  .profile-content-types { display: flex; flex-direction: column; gap: 0; }
+  .content-type-row {
+    display: flex; align-items: center; padding: 0.65rem 1.1rem;
+    border-bottom: 1px solid var(--border); gap: 1rem;
+  }
+  .content-type-row:last-child { border-bottom: none; }
+  .content-type-label { font-size: 0.8rem; font-weight: 500; flex: 0 0 140px; color: var(--muted); }
+
+  .days-grid {
+    display: flex; flex-wrap: wrap; gap: 4px; flex: 1;
+  }
+  .day-btn {
+    width: 26px; height: 26px; border-radius: 5px;
+    border: 1px solid var(--border); background: var(--surface2);
+    cursor: pointer; font-size: 0.58rem; font-weight: 700;
+    color: var(--muted); transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; flex-shrink: 0;
+  }
+  .day-btn:hover { border-color: var(--company-color); color: var(--company-color); }
+  .day-btn.published {
+    background: var(--company-color); border-color: var(--company-color);
+    color: #fff;
+  }
+  .day-btn.today { box-shadow: 0 0 0 2px var(--company-color); }
+  .day-btn.future { opacity: 0.3; cursor: default; pointer-events: none; }
+
+  .tracker-summary {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.8rem; margin-top: 1.2rem;
+  }
+  .summary-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.9rem 1rem;
+  }
+  .summary-card-label { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; margin-bottom: 0.3rem; }
+  .summary-card-num { font-size: 1.4rem; font-weight: 700; color: var(--company-color); }
+
+  /* TAB PUBBLICAZIONI */
+  .main-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+  .main-tab {
+    background: none; border: none; color: var(--muted);
+    font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.82rem;
+    padding: 0.9rem 1.4rem; cursor: pointer; border-bottom: 2px solid transparent;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .main-tab:hover { color: var(--text); }
+  .main-tab.active { color: var(--company-color); border-bottom-color: var(--company-color); }
+  .main-panel { display: none; padding-top: 1.6rem; }
+  .main-panel.active { display: block; animation: fadeIn 0.2s ease; }
+
+  @media (max-width: 600px) {
+    .content-type-label { flex: 0 0 100px; font-size: 0.72rem; }
+    .day-btn { width: 22px; height: 22px; font-size: 0.5rem; }
+    .tracker-summary { grid-template-columns: repeat(2, 1fr); }
+  }
+
   @media (max-width: 600px) {
     header, .tabs, main { padding-left: 1rem; padding-right: 1rem; }
     .task-item { flex-wrap: wrap; }
@@ -667,7 +759,18 @@
   </header>
 
   <div class="tabs" id="tabs"></div>
-  <main id="main-content"></main>
+  <main style="padding: 0 2rem; max-width: 1100px;">
+    <div class="main-tabs">
+      <button class="main-tab active" onclick="window._switchMainTab('tasks')">📋 Task</button>
+      <button class="main-tab" onclick="window._switchMainTab('tracker')">📅 Pubblicazioni</button>
+    </div>
+    <div class="main-panel active" id="main-tasks">
+      <div id="main-content"></div>
+    </div>
+    <div class="main-panel" id="main-tracker">
+      <div id="tracker-content"></div>
+    </div>
+  </main>
 </div>
 
 <script type="module">
@@ -1103,6 +1206,168 @@
     projectId: "gestionale-gabriele",
   };
   initFirebase(cfg);
+
+  // ── Tab switcher ─────────────────────────────────────────
+  window._switchMainTab = function(tab) {
+    document.querySelectorAll('.main-tab').forEach((el, i) => {
+      el.classList.toggle('active', (i===0&&tab==='tasks')||(i===1&&tab==='tracker'));
+    });
+    document.getElementById('main-tasks').classList.toggle('active', tab==='tasks');
+    document.getElementById('main-tracker').classList.toggle('active', tab==='tracker');
+    if (tab === 'tracker') renderTracker();
+  };
+
+  // ── Tracker ───────────────────────────────────────────────
+  const PROFILES = [
+    {
+      id: 'grow_with_luigi',
+      name: 'Grow With Luigi',
+      color: '#d4a017',
+      types: [
+        { id: 'post', label: '📸 Post' },
+      ]
+    },
+    {
+      id: 'luigi_stips',
+      name: 'Luigi Stips',
+      color: '#d4a017',
+      types: [
+        { id: 'reel', label: '🎬 Reel' },
+        { id: 'storia', label: '⏱ Storia' },
+      ]
+    },
+  ];
+
+  let trackerYear  = new Date().getFullYear();
+  let trackerMonth = new Date().getMonth(); // 0-based
+  let trackerData  = {}; // { 'grow_with_luigi_post_2025-07-01': true }
+
+  const MONTH_NAMES = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+
+  async function loadTrackerData() {
+    if (!db) return;
+    const { ref, get } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+    const snap = await get(ref(db, 'tracker/luigi'));
+    trackerData = snap.val() || {};
+    renderTracker();
+  }
+
+  async function toggleDay(profileId, typeId, dateStr) {
+    if (!db) return;
+    const key = profileId + '_' + typeId + '_' + dateStr;
+    const newVal = !trackerData[key];
+    trackerData[key] = newVal;
+    if (!newVal) delete trackerData[key];
+    await window._fbSet('tracker/luigi/' + key.replace(/[^a-zA-Z0-9_]/g, '_'), newVal || null);
+    renderTracker();
+    toast(newVal ? '✓ Pubblicazione segnata' : 'Pubblicazione rimossa');
+  }
+  window._toggleDay = toggleDay;
+
+  function getDaysInMonth(year, month) {
+    return new Date(year, month + 1, 0).getDate();
+  }
+
+  function renderTracker() {
+    const el = document.getElementById('tracker-content');
+    if (!el) return;
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const daysInMonth = getDaysInMonth(trackerYear, trackerMonth);
+    const isCurrentMonth = today.getFullYear()===trackerYear && today.getMonth()===trackerMonth;
+
+    // Calcola totali mese
+    let totalByProfile = {};
+    PROFILES.forEach(p => {
+      totalByProfile[p.id] = {};
+      p.types.forEach(t => {
+        let count = 0;
+        for (let d=1; d<=daysInMonth; d++) {
+          const dateStr = trackerYear + '-' + String(trackerMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+          const key = p.id + '_' + t.id + '_' + dateStr;
+          const safeKey = key.replace(/[^a-zA-Z0-9_]/g, '_');
+          if (trackerData[safeKey]) count++;
+        }
+        totalByProfile[p.id][t.id] = count;
+      });
+    });
+
+    const profilesHTML = PROFILES.map(p => {
+      const typesHTML = p.types.map(t => {
+        const daysHTML = Array.from({length: daysInMonth}, (_, i) => {
+          const d = i + 1;
+          const dateStr = trackerYear + '-' + String(trackerMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+          const key = (p.id + '_' + t.id + '_' + dateStr).replace(/[^a-zA-Z0-9_]/g, '_');
+          const published = !!trackerData[key];
+          const isToday = dateStr === todayStr;
+          const isFuture = dateStr > todayStr;
+          let cls = 'day-btn';
+          if (published) cls += ' published';
+          if (isToday) cls += ' today';
+          if (isFuture) cls += ' future';
+          return \`<button class="\${cls}" onclick="window._toggleDay('\${p.id}','\${t.id}','\${dateStr}')" title="\${dateStr}">\${d}</button>\`;
+        }).join('');
+
+        return \`<div class="content-type-row">
+          <span class="content-type-label">\${t.label}</span>
+          <div class="days-grid">\${daysHTML}</div>
+        </div>\`;
+      }).join('');
+
+      const statsHTML = p.types.map(t =>
+        \`<span class="profile-stat">\${t.label}: <span>\${totalByProfile[p.id][t.id]}</span></span>\`
+      ).join('');
+
+      return \`<div class="profile-block">
+        <div class="profile-block-header">
+          <span class="profile-name">\${p.name}</span>
+          <div class="profile-stats">\${statsHTML}</div>
+        </div>
+        <div class="profile-content-types">\${typesHTML}</div>
+      </div>\`;
+    }).join('');
+
+    // Totale generale del mese
+    let grandTotal = 0;
+    PROFILES.forEach(p => p.types.forEach(t => { grandTotal += totalByProfile[p.id][t.id]; }));
+    const gwlTotal = (totalByProfile['grow_with_luigi']?.post || 0);
+    const lsReels  = (totalByProfile['luigi_stips']?.reel || 0);
+    const lsStorie = (totalByProfile['luigi_stips']?.storia || 0);
+
+    el.innerHTML = \`
+      <div class="tracker-section">
+        <div class="tracker-header">
+          <span class="tracker-title">📅 Pubblicazioni — \${MONTH_NAMES[trackerMonth]} \${trackerYear}</span>
+          <div class="tracker-month-nav">
+            <button class="month-btn" onclick="window._prevMonth()">‹</button>
+            <span class="month-label">\${MONTH_NAMES[trackerMonth]} \${trackerYear}</span>
+            <button class="month-btn" onclick="window._nextMonth()">›</button>
+          </div>
+        </div>
+        <div class="tracker-profiles">\${profilesHTML}</div>
+        <div class="tracker-summary">
+          <div class="summary-card"><div class="summary-card-label">Totale contenuti</div><div class="summary-card-num">\${grandTotal}</div></div>
+          <div class="summary-card"><div class="summary-card-label">Grow With Luigi — Post</div><div class="summary-card-num">\${gwlTotal}</div></div>
+          <div class="summary-card"><div class="summary-card-label">Luigi Stips — Reels</div><div class="summary-card-num">\${lsReels}</div></div>
+          <div class="summary-card"><div class="summary-card-label">Luigi Stips — Storie</div><div class="summary-card-num">\${lsStorie}</div></div>
+        </div>
+      </div>\`;
+  }
+
+  window._prevMonth = function() {
+    trackerMonth--;
+    if (trackerMonth < 0) { trackerMonth = 11; trackerYear--; }
+    loadTrackerData();
+  };
+  window._nextMonth = function() {
+    trackerMonth++;
+    if (trackerMonth > 11) { trackerMonth = 0; trackerYear++; }
+    loadTrackerData();
+  };
+
+  // Carica tracker al boot
+  setTimeout(() => loadTrackerData(), 2000);
 </script>
 </body>
 </html>
