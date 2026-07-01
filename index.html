@@ -4,1370 +4,545 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Gestionale Luigi Stips</title>
-<link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;500;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
   :root {
-    --bg: #0a0a0a;
-    --surface: #141414;
-    --surface2: #1c1c1c;
-    --surface3: #212121;
-    --border: #282828;
-    --text: #f2f2f2;
-    --muted: #5a5a5a;
-    --accent: #f2f2f2;
-
-    /* Status colors */
-    --todo: #888;
-    --inprogress: #f4c85a;
-    --done: #4ade80;
-    --incomplete: #f49632;
-    --missingfiles: #a78bfa;
-
-    /* Company colors */
-    --focacciamo: #c0392b;
-    --focacciamo-dim: rgba(192,57,43,0.12);
-    --mancha: #ff7b00;
-    --mancha-dim: rgba(255,123,0,0.12);
-    --futuri: #39d353;
-    --futuri-dim: rgba(57,211,83,0.12);
-
-    --company-color: #d4a017;
-    --company-dim: rgba(212,160,23,0.12);
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c; --surface3: #212121;
+    --border: #282828; --text: #f2f2f2; --muted: #5a5a5a;
+    --todo: #888; --inprogress: #f4c85a; --done: #4ade80; --incomplete: #f49632; --missingfiles: #a78bfa;
+    --company-color: #d4a017; --company-dim: rgba(212,160,23,0.12);
+    --green: #4ade80; --yellow: #f4c85a; --accent2: #457b9d; --red: #f87171;
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* READONLY MODE - nascondi elementi di modifica */
-  body.readonly .edit-only { display: none !important; }
-  body.readonly .status-select { pointer-events: none; appearance: none; -webkit-appearance: none; border-color: transparent; background: transparent; padding-left: 0; cursor: default; }
-  body.readonly .expand-btn { pointer-events: auto; } /* accordion sempre cliccabile */
-  body.readonly .status-select { display: none !important; }
-  body.readonly .expand-btn.no-sub { visibility: hidden; pointer-events: none; }
-
-  /* BACKOFFICE BUTTON */
-  #backoffice-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-family: 'DM Sans', 'Helvetica Neue', Helvetica, sans-serif;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    color: var(--company-color);
-    background: var(--company-dim);
-    border: 1px solid var(--company-color);
-    border-radius: 20px;
-    padding: 0.4rem 0.9rem;
-    text-decoration: none;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-  #backoffice-btn:hover { opacity: 0.8; transform: translateY(-1px); }
-
-  /* LOCK BUTTON */
-  #lock-btn {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--muted);
-    font-size: 1rem;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
-    flex-shrink: 0;
-  }
-  #lock-btn:hover { border-color: var(--company-color); color: var(--company-color); }
-  body:not(.readonly) #lock-btn { border-color: var(--company-color); color: var(--company-color); background: var(--company-dim); }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; -webkit-font-smoothing:antialiased; }
+  body.readonly .edit-only { display:none !important; }
+  body.readonly .status-select { display:none !important; }
 
   /* HEADER */
-  header {
-    padding: 1.8rem 2rem 1.4rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
+  header { padding:1.8rem 2rem 1.4rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+  .header-left h1 { font-weight:700; font-size:clamp(1.4rem,3.5vw,2.2rem); letter-spacing:-0.02em; }
+  .header-left h1 span { color:var(--company-color); }
+  .header-sub { font-size:0.7rem; color:var(--muted); margin-top:0.35rem; letter-spacing:0.06em; text-transform:uppercase; font-weight:500; }
+  .status-dot { width:7px; height:7px; border-radius:50%; background:var(--done); display:inline-block; margin-right:6px; animation:pulse 2.5s infinite; }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.2}}
+  .header-right { display:flex; align-items:center; gap:0.6rem; }
+  #conn-status { font-size:0.65rem; color:var(--muted); padding:0.4rem 0.8rem; border:1px solid var(--border); border-radius:20px; white-space:nowrap; font-weight:500; }
+  #conn-status.connected { color:var(--done); border-color:rgba(74,222,128,0.3); }
+  #lock-btn { width:36px; height:36px; border-radius:50%; border:1px solid var(--border); background:var(--surface); color:var(--muted); font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+  #lock-btn:hover { border-color:var(--company-color); color:var(--company-color); }
+  body:not(.readonly) #lock-btn { border-color:var(--company-color); color:var(--company-color); background:var(--company-dim); }
 
-  .header-left h1 {
-    font-family: 'DM Sans', 'Helvetica Neue', Helvetica, sans-serif;
-    font-weight: 700;
-    font-size: clamp(1.4rem, 3.5vw, 2.2rem);
-    letter-spacing: -0.02em;
-    line-height: 1;
-    color: var(--text);
-  }
+  /* EDIT BANNER */
+  #edit-banner { display:none; background:var(--company-dim); border-bottom:1px solid var(--company-color); padding:0.5rem 2rem; font-size:0.72rem; font-weight:600; color:var(--company-color); letter-spacing:0.05em; text-transform:uppercase; text-align:center; }
+  body:not(.readonly) #edit-banner { display:block; }
 
-  .header-left h1 span { color: var(--company-color); transition: color 0.3s; }
-
-  .header-sub {
-    font-size: 0.7rem;
-    color: var(--muted);
-    margin-top: 0.35rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    font-weight: 500;
-  }
-
-  .status-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--done);
-    display: inline-block;
-    margin-right: 6px;
-    animation: pulse 2.5s infinite;
-  }
-
-  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.2} }
-
-  .header-right { display: flex; align-items: center; gap: 0.6rem; }
-
-  #conn-status {
-    font-size: 0.65rem;
-    color: var(--muted);
-    padding: 0.4rem 0.8rem;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    white-space: nowrap;
-    font-weight: 500;
-    letter-spacing: 0.03em;
-  }
-  #conn-status.connected { color: var(--done); border-color: rgba(74,222,128,0.3); }
-  #conn-status.error { color: #f87171; border-color: rgba(248,113,113,0.3); }
-
-  /* TABS */
-  .tabs {
-    display: flex;
-    padding: 0 2rem;
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .tabs::-webkit-scrollbar { display: none; }
-
-  .tab-btn {
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-family: 'DM Sans', 'Helvetica Neue', Helvetica, sans-serif;
-    font-weight: 600;
-    font-size: 0.82rem;
-    letter-spacing: 0.02em;
-    padding: 1rem 1.4rem;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s;
-    white-space: nowrap;
-    position: relative;
-  }
-  .tab-btn:hover { color: var(--text); }
-  .tab-btn.active { color: var(--company-color); border-bottom-color: var(--company-color); }
-
-  .tab-count {
-    font-size: 0.6rem;
-    font-weight: 700;
-    background: var(--surface2);
-    border-radius: 10px;
-    padding: 1px 6px;
-    margin-left: 5px;
-    color: var(--muted);
-    transition: all 0.2s;
-  }
-  .tab-btn.active .tab-count {
-    background: var(--company-color);
-    color: #fff;
-  }
-
-  /* MAIN */
-  main { padding: 0 2rem 2rem; max-width: 1100px; } #main-content { padding-top: 1.6rem; }
-
-  .company-panel { display: none; }
-  .company-panel.active { display: block; animation: fadeIn 0.2s ease; }
-
-  @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+  /* MAIN TABS */
+  .main-tabs { display:flex; border-bottom:1px solid var(--border); padding:0 2rem; }
+  .main-tab { background:none; border:none; color:var(--muted); font-family:'DM Sans',sans-serif; font-weight:600; font-size:0.82rem; padding:0.9rem 1.4rem; cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; white-space:nowrap; }
+  .main-tab:hover { color:var(--text); }
+  .main-tab.active { color:var(--company-color); border-bottom-color:var(--company-color); }
+  .main-panel { display:none; padding:1.6rem 2rem; max-width:1100px; }
+  .main-panel.active { display:block; animation:fadeIn 0.2s ease; }
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 
   /* STATS */
-  .stats-bar {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-    gap: 0.8rem;
-    margin-bottom: 1.8rem;
-  }
-
-  .stat {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1rem 1.1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-  .stat-label {
-    font-size: 0.65rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    font-weight: 600;
-  }
-  .stat-num {
-    font-weight: 700;
-    font-size: 1.6rem;
-    line-height: 1;
-    color: var(--text);
-  }
-  .stat-num.highlight { color: var(--company-color); }
-  .stat-bar-inner {
-    height: 2px;
-    border-radius: 2px;
-    background: var(--border);
-    margin-top: 0.4rem;
-    overflow: hidden;
-  }
-  .stat-bar-fill {
-    height: 100%;
-    border-radius: 2px;
-    background: var(--company-color);
-    transition: width 0.5s ease;
-  }
+  .stats-bar { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:0.8rem; margin-bottom:1.8rem; }
+  .stat { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:1rem 1.1rem; }
+  .stat-label { font-size:0.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; font-weight:600; margin-bottom:0.3rem; }
+  .stat-num { font-weight:700; font-size:1.6rem; line-height:1; }
+  .stat-num.hl { color:var(--company-color); }
+  .stat-bar-inner { height:2px; border-radius:2px; background:var(--border); margin-top:0.4rem; overflow:hidden; }
+  .stat-bar-fill { height:100%; border-radius:2px; background:var(--company-color); transition:width 0.5s; }
 
   /* ADD TASK */
-  .add-section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1rem 1.2rem;
-    margin-bottom: 1.6rem;
-    display: flex;
-    gap: 0.7rem;
-    align-items: center;
-  }
-  .add-section input[type="text"] {
-    flex: 1;
-    min-width: 0;
-    background: transparent;
-    border: none;
-    color: var(--text);
-    font-family: 'DM Sans', 'Helvetica Neue', Helvetica, sans-serif;
-    font-size: 0.9rem;
-    font-weight: 400;
-    padding: 0.3rem 0;
-    outline: none;
-  }
-  .add-section input[type="text"]::placeholder { color: var(--muted); }
+  .add-section { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:1rem 1.2rem; margin-bottom:1.6rem; display:flex; gap:0.7rem; align-items:center; }
+  .add-section input { flex:1; min-width:0; background:transparent; border:none; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.9rem; outline:none; }
+  .add-section input::placeholder { color:var(--muted); }
+  .btn-add { font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.75rem; border:none; border-radius:6px; padding:0.55rem 1.1rem; cursor:pointer; background:var(--company-color); color:#fff; transition:all 0.15s; flex-shrink:0; }
+  .btn-add:hover { opacity:0.85; }
 
-  .btn-add {
-    font-family: 'DM Sans', 'Helvetica Neue', Helvetica, sans-serif;
-    font-weight: 700;
-    font-size: 0.75rem;
-    letter-spacing: 0.04em;
-    border: none;
-    border-radius: 6px;
-    padding: 0.55rem 1.1rem;
-    cursor: pointer;
-    transition: all 0.15s;
-    background: var(--company-color);
-    color: #fff;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .btn-add:hover { opacity: 0.85; transform: translateY(-1px); }
+  /* TASKS */
+  .tasks-list { display:flex; flex-direction:column; gap:0.5rem; }
+  .task-wrapper { display:flex; flex-direction:column; }
+  .task-item { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:0.9rem 1.1rem; display:flex; align-items:center; gap:0.75rem; transition:all 0.15s; }
+  .task-wrapper.has-subtasks-open > .task-item { border-bottom-left-radius:0; border-bottom-right-radius:0; border-bottom-color:transparent; }
+  .task-item:hover { background:var(--surface2); }
+  .task-item.status-todo { border-left:3px solid var(--border); }
+  .task-item.status-inprogress { border-left:3px solid var(--inprogress); }
+  .task-item.status-done { border-left:3px solid var(--done); }
+  .task-item.status-incomplete { border-left:3px solid var(--incomplete); }
+  .task-item.status-missingfiles { border-left:3px solid var(--missingfiles); }
+  .task-item.status-done .task-name { text-decoration:line-through; color:var(--muted); }
+  .expand-btn { background:none; border:none; cursor:pointer; color:var(--muted); font-size:0.65rem; padding:0.2rem 0.3rem; border-radius:4px; display:flex; align-items:center; gap:3px; flex-shrink:0; transition:all 0.15s; }
+  .expand-btn:hover { color:var(--text); background:var(--surface2); }
+  .expand-btn .arrow { display:inline-block; transition:transform 0.2s; }
+  .expand-btn.open .arrow { transform:rotate(90deg); }
+  .expand-btn .sub-count { font-size:0.6rem; font-weight:700; background:var(--surface2); border-radius:8px; padding:1px 5px; min-width:18px; text-align:center; }
+  .expand-btn.has-incomplete .sub-count { background:rgba(244,200,90,0.2); color:var(--inprogress); }
+  .expand-btn.all-done .sub-count { background:rgba(74,222,128,0.15); color:var(--done); }
+  .task-name { flex:1; min-width:0; font-size:0.9rem; font-weight:500; word-break:break-word; }
+  .task-name-edit { flex:1; background:var(--surface2); border:1px solid var(--company-color); border-radius:6px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.9rem; padding:0.35rem 0.7rem; outline:none; min-width:0; }
+  .task-meta { display:flex; align-items:center; gap:0.35rem; flex-shrink:0; flex-wrap:wrap; justify-content:flex-end; }
+  .status-select { font-family:'DM Sans',sans-serif; font-size:0.68rem; font-weight:600; background:var(--surface2); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:0.28rem 0.5rem; cursor:pointer; outline:none; }
+  .status-select option { background:var(--surface2); }
+  .status-badge { font-size:0.6rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; padding:0.2rem 0.5rem; border-radius:20px; white-space:nowrap; }
+  .badge-todo { background:rgba(136,136,136,0.15); color:#888; }
+  .badge-inprogress { background:rgba(244,200,90,0.15); color:var(--inprogress); }
+  .badge-done { background:rgba(74,222,128,0.15); color:var(--done); }
+  .badge-incomplete { background:rgba(244,150,50,0.15); color:var(--incomplete); }
+  .badge-missingfiles { background:rgba(167,139,250,0.15); color:var(--missingfiles); }
+  .icon-btn { background:none; border:none; cursor:pointer; color:var(--muted); font-size:0.82rem; padding:0.22rem; border-radius:4px; transition:all 0.15s; line-height:1; flex-shrink:0; }
+  .icon-btn:hover { color:var(--text); }
+  .icon-btn.delete:hover { color:var(--red); }
+  .task-date { font-size:0.6rem; color:var(--muted); white-space:nowrap; }
 
-  /* TASKS LIST */
-  .tasks-list { display: flex; flex-direction: column; gap: 0.5rem; }
+  /* SUBTASKS */
+  .subtasks-panel { background:var(--surface2); border:1px solid var(--border); border-top:none; border-bottom-left-radius:10px; border-bottom-right-radius:10px; overflow:hidden; max-height:0; transition:max-height 0.3s ease, padding 0.3s ease; }
+  .subtasks-panel.open { max-height:1200px; padding:0.8rem 1rem 0.9rem 2.2rem; }
+  .subtasks-list { display:flex; flex-direction:column; gap:0.35rem; margin-bottom:0.7rem; }
+  .subtask-item { background:var(--surface3); border:1px solid #252525; border-radius:8px; padding:0.55rem 0.85rem; display:flex; align-items:center; flex-wrap:wrap; gap:0.5rem; font-size:0.84rem; }
+  .subtask-item.status-todo { border-left:2px solid #333; }
+  .subtask-item.status-inprogress { border-left:2px solid var(--inprogress); }
+  .subtask-item.status-done { border-left:2px solid var(--done); }
+  .subtask-item.status-incomplete { border-left:2px solid var(--incomplete); }
+  .subtask-item.status-missingfiles { border-left:2px solid var(--missingfiles); }
+  .subtask-item.status-done .subtask-name { text-decoration:line-through; color:var(--muted); }
+  .subtask-arrow { color:var(--muted); font-size:0.65rem; flex-shrink:0; }
+  .subtask-name { flex:1; min-width:0; word-break:break-word; font-weight:400; }
+  .subtask-name-edit { flex:1; background:var(--surface2); border:1px solid var(--company-color); border-radius:5px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.84rem; padding:0.25rem 0.55rem; outline:none; min-width:0; }
+  .add-subtask-row { display:flex; gap:0.5rem; align-items:center; }
+  .add-subtask-row input { flex:1; min-width:0; background:var(--surface3); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.8rem; padding:0.45rem 0.75rem; outline:none; }
+  .add-subtask-row input:focus { border-color:var(--company-color); }
+  .add-subtask-row input::placeholder { color:var(--muted); }
+  .btn-sub { font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.68rem; border:1px solid var(--border); border-radius:6px; padding:0.45rem 0.85rem; cursor:pointer; background:var(--surface); color:var(--muted); transition:all 0.15s; flex-shrink:0; }
+  .btn-sub:hover { color:var(--text); border-color:var(--company-color); }
 
-  /* TASK WRAPPER */
-  .task-wrapper { display: flex; flex-direction: column; }
+  /* TRACKER */
+  .tracker-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem; }
+  .tracker-title { font-size:0.9rem; font-weight:700; }
+  .tracker-month-nav { display:flex; align-items:center; gap:0.5rem; }
+  .tracker-month-nav button { background:var(--surface); border:1px solid var(--border); color:var(--text); border-radius:6px; width:28px; height:28px; cursor:pointer; font-size:0.8rem; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+  .tracker-month-nav button:hover { border-color:var(--company-color); color:var(--company-color); }
+  .tracker-month-label { font-size:0.82rem; font-weight:600; min-width:120px; text-align:center; }
+  .tracker-profiles { display:flex; flex-direction:column; gap:1rem; margin-bottom:1.2rem; }
+  .profile-block { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .profile-block-header { padding:0.7rem 1rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; }
+  .profile-block-name { font-size:0.85rem; font-weight:700; }
+  .profile-block-stats { display:flex; gap:0.6rem; flex-wrap:wrap; }
+  .profile-stat-pill { font-size:0.62rem; font-weight:600; color:var(--muted); background:var(--surface2); border-radius:20px; padding:0.18rem 0.55rem; }
+  .profile-stat-pill span { color:var(--yellow); }
+  .content-type-row { display:flex; align-items:center; padding:0.6rem 1rem; border-bottom:1px solid var(--border); gap:0.8rem; }
+  .content-type-row:last-child { border-bottom:none; }
+  .content-type-label { font-size:0.75rem; font-weight:500; color:var(--muted); flex:0 0 130px; }
+  .days-grid { display:flex; flex-wrap:wrap; gap:3px; flex:1; }
+  .day-btn { width:26px; height:26px; border-radius:5px; border:1px solid var(--border); background:var(--surface2); cursor:pointer; font-size:0.56rem; font-weight:700; color:var(--muted); display:flex; align-items:center; justify-content:center; transition:all 0.12s; flex-shrink:0; }
+  .day-btn:hover { border-color:var(--company-color); color:var(--company-color); }
+  .day-btn.published { background:var(--company-color); border-color:var(--company-color); color:#111; }
+  .day-btn.today { box-shadow:0 0 0 2px var(--company-color); }
+  .day-btn.future { opacity:0.25; cursor:default; pointer-events:none; }
+  .progress-row { height:2px; background:var(--border); border-radius:2px; overflow:hidden; margin-top:0.4rem; }
+  .progress-fill { height:100%; border-radius:2px; transition:width 0.4s; }
 
-  /* TASK ITEM */
-  .task-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.9rem 1.1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    transition: border-color 0.15s, background 0.15s;
-    position: relative;
-  }
+  /* COMPENSO */
+  .compenso-row { display:flex; align-items:center; justify-content:space-between; padding:0.65rem 1rem; border-bottom:1px solid var(--border); }
+  .compenso-row:last-child { border-bottom:none; background:var(--surface2); }
+  .compenso-label { font-size:0.82rem; font-weight:500; }
+  .compenso-sub { font-size:0.62rem; color:var(--muted); margin-top:1px; }
+  .compenso-amt { font-size:0.9rem; font-weight:700; color:var(--done); }
+  .compenso-amt.zero { color:var(--muted); }
+  .compenso-total { font-size:1rem; font-weight:700; color:var(--done); }
 
-  .task-wrapper.has-subtasks-open > .task-item {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    border-bottom-color: transparent;
-  }
+  /* TARGET CARDS */
+  .target-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:0.7rem; margin-bottom:1.4rem; }
+  .target-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:0.85rem 1rem; }
+  .target-label { font-size:0.6rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:0.3rem; }
+  .target-num { font-size:1.4rem; font-weight:700; color:var(--company-color); }
+  .target-sub { font-size:0.6rem; color:var(--muted); margin-top:0.3rem; }
 
-  .task-item:hover { background: var(--surface2); }
-
-  /* Colored left border by status */
-  .task-item.status-todo        { border-left: 3px solid var(--border); }
-  .task-item.status-inprogress  { border-left: 3px solid var(--inprogress); }
-  .task-item.status-done        { border-left: 3px solid var(--done); }
-  .task-item.status-incomplete  { border-left: 3px solid var(--incomplete); }
-  .task-item.status-missingfiles{ border-left: 3px solid var(--missingfiles); }
-
-  .task-item.status-done .task-name { text-decoration: line-through; color: var(--muted); }
-
-  /* EXPAND BTN */
-  .expand-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--muted);
-    font-size: 0.65rem;
-    padding: 0.2rem 0.3rem;
-    border-radius: 4px;
-    transition: color 0.15s, background 0.15s;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    white-space: nowrap;
-  }
-  .expand-btn:hover { color: var(--text); background: var(--surface2); }
-  .expand-btn .arrow { display: inline-block; transition: transform 0.2s; }
-  .expand-btn.open .arrow { transform: rotate(90deg); }
-  .expand-btn .sub-count {
-    font-size: 0.6rem;
-    font-weight: 700;
-    background: var(--surface2);
-    border-radius: 8px;
-    padding: 1px 5px;
-    min-width: 18px;
-    text-align: center;
-  }
-  .expand-btn.has-incomplete .sub-count {
-    background: rgba(244,200,90,0.2);
-    color: var(--inprogress);
-  }
-  .expand-btn.all-done .sub-count {
-    background: rgba(74,222,128,0.15);
-    color: var(--done);
-  }
-
-  /* TASK NAME */
-  .task-name {
-    flex: 1;
-    min-width: 0;
-    font-size: 0.9rem;
-    font-weight: 500;
-    line-height: 1.4;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-    letter-spacing: -0.01em;
-  }
-  .task-name-edit {
-    flex: 1;
-    background: var(--surface2);
-    border: 1px solid var(--company-color);
-    border-radius: 6px;
-    color: var(--text);
-    font-family: 'DM Sans', 'Helvetica Neue', Helvetica, sans-serif;
-    font-size: 0.9rem;
-    padding: 0.35rem 0.7rem;
-    outline: none;
-    min-width: 0;
-  }
-
-  /* TASK META */
-  .task-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    flex-shrink: 0;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-
-  /* STATUS SELECT */
-  .status-select {
-    font-family: 'DM Sans', 'Helvetica Neue', Helvetica, sans-serif;
-    font-size: 0.68rem;
-    font-weight: 600;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    padding: 0.28rem 0.5rem;
-    cursor: pointer;
-    outline: none;
-    transition: border-color 0.2s;
-    max-width: 130px;
-  }
-  .status-select:focus { border-color: var(--company-color); }
-  .status-select option { background: var(--surface2); }
-
-  /* STATUS BADGE */
-  .status-badge {
-    font-size: 0.6rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    padding: 0.2rem 0.5rem;
-    border-radius: 20px;
-    white-space: nowrap;
-  }
-  .badge-todo        { background: rgba(136,136,136,0.15); color: #888; }
-  .badge-inprogress  { background: rgba(244,200,90,0.15);  color: var(--inprogress); }
-  .badge-done        { background: rgba(74,222,128,0.15);  color: var(--done); }
-  .badge-incomplete  { background: rgba(244,150,50,0.15);  color: var(--incomplete); }
-  .badge-missingfiles{ background: rgba(167,139,250,0.15); color: var(--missingfiles); }
-
-  /* ICON BTNS */
-  .icon-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--muted);
-    font-size: 0.82rem;
-    padding: 0.22rem;
-    border-radius: 4px;
-    transition: color 0.15s, background 0.15s;
-    line-height: 1;
-    flex-shrink: 0;
-  }
-  .icon-btn:hover { color: var(--text); background: var(--surface2); }
-  .icon-btn.delete:hover { color: #f87171; }
-
-  .task-date {
-    font-size: 0.6rem;
-    color: var(--muted);
-    white-space: nowrap;
-    font-weight: 500;
-  }
-
-  /* BLOCKED BADGE */
-  .blocked-badge {
-    font-size: 0.58rem;
-    font-weight: 700;
-    background: rgba(248,113,113,0.1);
-    color: #f87171;
-    border: 1px solid rgba(248,113,113,0.25);
-    border-radius: 20px;
-    padding: 0.18rem 0.45rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-
-  /* SUBTASKS PANEL */
-  .subtasks-panel {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-top: none;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.3s ease, padding 0.3s ease;
-  }
-  .subtasks-panel.open {
-    max-height: 1200px;
-    padding: 0.8rem 1rem 0.9rem 2.2rem;
-  }
-
-  .subtasks-list { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.7rem; }
-
-  /* SUBTASK ITEM */
-  .subtask-item {
-    background: var(--surface3);
-    border: 1px solid #252525;
-    border-radius: 8px;
-    padding: 0.55rem 0.85rem;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: 0.84rem;
-  }
-  .subtask-item.status-todo        { border-left: 2px solid #333; }
-  .subtask-item.status-inprogress  { border-left: 2px solid var(--inprogress); }
-  .subtask-item.status-done        { border-left: 2px solid var(--done); }
-  .subtask-item.status-incomplete  { border-left: 2px solid var(--incomplete); }
-  .subtask-item.status-missingfiles{ border-left: 2px solid var(--missingfiles); }
-  .subtask-item.status-done .subtask-name { text-decoration: line-through; color: var(--muted); }
-
-  .subtask-arrow { color: var(--muted); font-size: 0.65rem; flex-shrink: 0; }
-
-  .subtask-name {
-    flex: 1;
-    min-width: 0;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-    font-weight: 400;
-    color: var(--text);
-  }
-  .subtask-name-edit {
-    flex: 1;
-    background: var(--surface2);
-    border: 1px solid var(--company-color);
-    border-radius: 5px;
-    color: var(--text);
-    font-family: 'DM Sans', 'Helvetica Neue', Helvetica, sans-serif;
-    font-size: 0.84rem;
-    padding: 0.25rem 0.55rem;
-    outline: none;
-    min-width: 0;
-  }
-
-  /* ADD SUBTASK */
-  .add-subtask-row {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-  }
-  .add-subtask-row input {
-    flex: 1;
-    min-width: 0;
-    background: var(--surface3);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    font-family: 'DM Sans', 'Helvetica Neue', Helvetica, sans-serif;
-    font-size: 0.8rem;
-    padding: 0.45rem 0.75rem;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .add-subtask-row input:focus { border-color: var(--company-color); }
-  .add-subtask-row input::placeholder { color: var(--muted); }
-
-  .btn-sub {
-    font-family: 'DM Sans', 'Helvetica Neue', Helvetica, sans-serif;
-    font-weight: 700;
-    font-size: 0.68rem;
-    letter-spacing: 0.03em;
-    border: none;
-    border-radius: 6px;
-    padding: 0.45rem 0.85rem;
-    cursor: pointer;
-    background: var(--surface);
-    color: var(--muted);
-    border: 1px solid var(--border);
-    transition: all 0.15s;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .btn-sub:hover { color: var(--text); border-color: var(--company-color); }
-
-  /* EMPTY STATE */
-  .empty-state {
-    text-align: center;
-    padding: 2.5rem 2rem;
-    color: var(--muted);
-    font-size: 0.82rem;
-    border: 1px dashed var(--border);
-    border-radius: 10px;
-    font-weight: 400;
-  }
-  .empty-icon { font-size: 1.8rem; margin-bottom: 0.8rem; opacity: 0.3; }
-
-  /* LOADING */
-  #loading {
-    position: fixed; inset: 0;
-    background: var(--bg);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    z-index: 100; gap: 1rem;
-  }
-  .loader {
-    width: 36px; height: 36px;
-    border: 2px solid var(--border);
-    border-top-color: #d4a017;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to{transform:rotate(360deg)} }
-  #loading p { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; }
-
-  /* TOAST */
-  #toast {
-    position: fixed; bottom: 1.5rem; right: 1.5rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-size: 0.78rem;
-    font-weight: 500;
-    padding: 0.75rem 1.2rem;
-    border-radius: 8px;
-    opacity: 0; transform: translateY(8px);
-    transition: all 0.2s;
-    z-index: 200; pointer-events: none;
-  }
-  #toast.show { opacity: 1; transform: translateY(0); }
-
-  /* EDIT MODE BANNER */
-  #edit-banner {
-    display: none;
-    background: var(--company-dim);
-    border-bottom: 1px solid var(--company-color);
-    padding: 0.5rem 2rem;
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--company-color);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    text-align: center;
-    transition: background 0.3s, border-color 0.3s, color 0.3s;
-  }
-  body:not(.readonly) #edit-banner { display: block; }
+  /* EMPTY / LOADING / TOAST */
+  .empty-state { text-align:center; padding:2.5rem 2rem; color:var(--muted); font-size:0.82rem; border:1px dashed var(--border); border-radius:10px; }
+  #loading { position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; gap:1rem; }
+  .loader { width:36px; height:36px; border:2px solid var(--border); border-top-color:var(--company-color); border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #loading p { font-size:0.72rem; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase; }
+  #toast { position:fixed; bottom:1.5rem; right:1.5rem; background:var(--surface); border:1px solid var(--border); color:var(--text); font-size:0.78rem; font-weight:500; padding:0.75rem 1.2rem; border-radius:8px; opacity:0; transform:translateY(8px); transition:all 0.2s; z-index:200; pointer-events:none; }
+  #toast.show { opacity:1; transform:translateY(0); }
 
   /* RESPONSIVE */
-  /* TRACKER PUBBLICAZIONI */
-  .tracker-section { margin-bottom: 2rem; }
-  .tracker-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;
-  }
-  .tracker-title { font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; }
-  .tracker-month-nav { display: flex; align-items: center; gap: 0.6rem; }
-  .month-btn {
-    background: var(--surface); border: 1px solid var(--border);
-    color: var(--text); border-radius: 6px; padding: 0.35rem 0.7rem;
-    cursor: pointer; font-size: 0.78rem; font-weight: 600;
-    font-family: 'DM Sans', sans-serif; transition: all 0.15s;
-  }
-  .month-btn:hover { border-color: var(--company-color); color: var(--company-color); }
-  .month-label { font-size: 0.85rem; font-weight: 600; color: var(--text); min-width: 120px; text-align: center; }
-
-  .tracker-profiles { display: flex; flex-direction: column; gap: 1.2rem; }
-
-  .profile-block {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; overflow: hidden;
-  }
-  .profile-block-header {
-    padding: 0.8rem 1.1rem; border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
-  }
-  .profile-name { font-size: 0.88rem; font-weight: 700; }
-  .profile-stats { display: flex; gap: 0.8rem; flex-wrap: wrap; }
-  .profile-stat {
-    font-size: 0.68rem; font-weight: 600; color: var(--muted);
-    background: var(--surface2); border-radius: 20px; padding: 0.2rem 0.6rem;
-  }
-  .profile-stat span { color: var(--company-color); }
-
-  .profile-content-types { display: flex; flex-direction: column; gap: 0; }
-  .content-type-row {
-    display: flex; align-items: center; padding: 0.65rem 1.1rem;
-    border-bottom: 1px solid var(--border); gap: 1rem;
-  }
-  .content-type-row:last-child { border-bottom: none; }
-  .content-type-label { font-size: 0.8rem; font-weight: 500; flex: 0 0 140px; color: var(--muted); }
-
-  .days-grid {
-    display: flex; flex-wrap: wrap; gap: 4px; flex: 1;
-  }
-  .day-btn {
-    width: 26px; height: 26px; border-radius: 5px;
-    border: 1px solid var(--border); background: var(--surface2);
-    cursor: pointer; font-size: 0.58rem; font-weight: 700;
-    color: var(--muted); transition: all 0.15s;
-    display: flex; align-items: center; justify-content: center;
-    position: relative; flex-shrink: 0;
-  }
-  .day-btn:hover { border-color: var(--company-color); color: var(--company-color); }
-  .day-btn.published {
-    background: var(--company-color); border-color: var(--company-color);
-    color: #fff;
-  }
-  .day-btn.today { box-shadow: 0 0 0 2px var(--company-color); }
-  .day-btn.future { opacity: 0.3; cursor: default; pointer-events: none; }
-
-  .tracker-summary {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 0.8rem; margin-top: 1.2rem;
-  }
-  .summary-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: 0.9rem 1rem;
-  }
-  .summary-card-label { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; margin-bottom: 0.3rem; }
-  .summary-card-num { font-size: 1.4rem; font-weight: 700; color: var(--company-color); }
-
-  /* TAB PUBBLICAZIONI */
-  .main-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 0; }
-  .main-tab {
-    background: none; border: none; color: var(--muted);
-    font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.82rem;
-    padding: 0.9rem 1.4rem; cursor: pointer; border-bottom: 2px solid transparent;
-    transition: all 0.2s; white-space: nowrap;
-  }
-  .main-tab:hover { color: var(--text); }
-  .main-tab.active { color: var(--company-color); border-bottom-color: var(--company-color); }
-  .main-panel { display: none; padding-top: 1.6rem; }
-  .main-panel.active { display: block; animation: fadeIn 0.2s ease; }
-
-  @media (max-width: 600px) {
-    .content-type-label { flex: 0 0 100px; font-size: 0.72rem; }
-    .day-btn { width: 22px; height: 22px; font-size: 0.5rem; }
-    .tracker-summary { grid-template-columns: repeat(2, 1fr); }
-  }
-
-  @media (max-width: 600px) {
-    header, .tabs, main { padding-left: 1rem; padding-right: 1rem; }
-    .task-item { flex-wrap: wrap; }
-    .task-meta { width: 100%; justify-content: flex-end; margin-top: 0.3rem; }
-    .subtasks-panel.open { padding-left: 0.8rem; padding-right: 0.6rem; }
-    .subtask-item { flex-wrap: wrap; }
-    .subtask-item .task-meta { width: 100%; justify-content: flex-end; }
-    .subtask-name { width: 100%; }
-    .add-subtask-row { flex-wrap: wrap; }
-    .add-subtask-row input { width: 100%; }
-    .stats-bar { grid-template-columns: repeat(2, 1fr); }
-    .status-select { max-width: 110px; }
+  @media(max-width:600px){
+    header, .main-tabs, .main-panel { padding-left:1rem; padding-right:1rem; }
+    .content-type-label { flex:0 0 90px; font-size:0.65rem; }
+    .day-btn { width:20px; height:20px; font-size:0.48rem; }
+    .target-grid { grid-template-columns:repeat(2,1fr); }
+    .task-item { flex-wrap:wrap; }
+    .task-meta { width:100%; justify-content:flex-end; margin-top:0.3rem; }
   }
 </style>
 </head>
 <body class="readonly">
-
-<div id="loading">
-  <div class="loader"></div>
-  <p>Caricamento…</p>
-</div>
-
+<div id="loading"><div class="loader"></div><p>Caricamento…</p></div>
 <div id="toast"></div>
 
 <div id="app" style="display:none">
   <div id="edit-banner">✏️ Modalità modifica attiva</div>
-
   <header>
     <div class="header-left">
-      <h1>Gestionale <span id="company-title">Luigi Stips</span></h1>
-      <div class="header-sub"><span class="status-dot"></span>Dashboard operativa · Luigi Stips</div>
+      <h1>Gestionale <span>Luigi Stips</span></h1>
+      <div class="header-sub"><span class="status-dot"></span>Dashboard operativa</div>
     </div>
     <div class="header-right">
       <div id="conn-status">● Connessione…</div>
-      <a id="backoffice-btn" href="#" target="_blank" title="Apri Backoffice" style="display:none">
-        🖥 Backoffice
-      </a>
-      <button id="lock-btn" title="Modalità modifica" onclick="window._toggleEdit()">🔒</button>
+      <button id="lock-btn" onclick="toggleEdit()">🔒</button>
     </div>
   </header>
 
-  <div class="tabs" id="tabs"></div>
-  <main style="padding: 0 2rem; max-width: 1100px;">
-    <div class="main-tabs">
-      <button class="main-tab active" onclick="window._switchMainTab('tasks')">📋 Task</button>
-      <button class="main-tab" onclick="window._switchMainTab('tracker')">📅 Pubblicazioni</button>
+  <div class="main-tabs">
+    <button class="main-tab active" onclick="switchMainTab('tasks',this)">📋 Task</button>
+    <button class="main-tab" onclick="switchMainTab('tracker',this)">📅 Pubblicazioni</button>
+  </div>
+
+  <div class="main-panel active" id="panel-tasks">
+    <div class="stats-bar" id="stats-bar"></div>
+    <div class="add-section edit-only">
+      <input type="text" id="task-input" placeholder="Nuova task…" onkeydown="if(event.key==='Enter') addTask()"/>
+      <button class="btn-add" onclick="addTask()">+ Aggiungi</button>
     </div>
-    <div class="main-panel active" id="main-tasks">
-      <div id="main-content"></div>
-    </div>
-    <div class="main-panel" id="main-tracker">
-      <div id="tracker-content"></div>
-    </div>
-  </main>
+    <div class="tasks-list" id="tasks-list"></div>
+  </div>
+
+  <div class="main-panel" id="panel-tracker">
+    <div id="tracker-content"></div>
+  </div>
 </div>
 
 <script type="module">
-  const COMPANIES = [
-    { id: 'luigi_luigi', name: 'Luigi Stips', color: '#d4a017', dim: 'rgba(212,160,23,0.12)', backoffice: null },
-  ];
+const CID = 'luigi_luigi';
+const PROFILES = [
+  {id:'grow_with_luigi', name:'Grow With Luigi', types:[
+    {id:'reel', label:'🎬 Reel'},
+  ]},
+  {id:'luigi_stips', name:'Luigi Stips', types:[
+    {id:'reel',   label:'🎬 Reel'},
+    {id:'storia', label:'⏱ Storia'},
+  ]},
+];
+const MONTHS = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
-  let db = null;
-  let activeTab = COMPANIES[0].id;
-  let allTasks = {};
-  let editingId = null;
-  let openAccordions = new Set();
-  let isEditMode = false;
+let db, allTasks={}, openAcc=new Set(), editingId=null, isEdit=false;
+let trackerYear=new Date().getFullYear(), trackerMonth=new Date().getMonth();
+let trackerData={}, trackerLoaded=false;
 
-  // ── Edit mode toggle ────────────────────────────────────────
-  window._toggleEdit = function() {
-    isEditMode = !isEditMode;
-    document.body.classList.toggle('readonly', !isEditMode);
-    document.getElementById('lock-btn').textContent = isEditMode ? '🔓' : '🔒';
-    toast(isEditMode ? '✏️ Modifica abilitata' : '🔒 Sola lettura');
-  };
+// ── FIREBASE ──
+async function init(){
+  const {initializeApp}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+  const {getDatabase,ref,onValue,set,remove,push,get}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+  const app=initializeApp({
+    apiKey:'AIzaSyAfy8G_pHz8DftywbYi4YX1k71EyrmOgxQ',
+    authDomain:'gestionale-gabriele.firebaseapp.com',
+    databaseURL:'https://gestionale-gabriele-default-rtdb.europe-west1.firebasedatabase.app',
+    projectId:'gestionale-gabriele',
+  });
+  db=getDatabase(app);
+  const cs=document.getElementById('conn-status');
+  cs.textContent='● Live'; cs.className='connected';
 
-  // ── Company color switch ────────────────────────────────────
-  function applyCompanyColor(cid) {
-    const c = COMPANIES.find(x => x.id === cid);
-    if (!c) return;
-    document.documentElement.style.setProperty('--company-color', c.color);
-    document.documentElement.style.setProperty('--company-dim', c.dim);
-    document.getElementById('company-title').textContent = c.name;
-    const btn = document.getElementById('backoffice-btn');
-    if (c.backoffice) {
-      btn.href = c.backoffice;
-      btn.style.display = 'flex';
-    } else {
-      btn.style.display = 'none';
-    }
+  onValue(ref(db,`tasks/${CID}`),snap=>{allTasks=snap.val()||{};renderTasks();renderStats();});
+
+  window._set=(p,v)=>set(ref(db,p),v);
+  window._remove=p=>remove(ref(db,p));
+  window._push=(p,v)=>push(ref(db,p),v);
+  window._get=p=>get(ref(db,p));
+
+  document.getElementById('loading').style.display='none';
+  document.getElementById('app').style.display='block';
+}
+
+// ── EDIT TOGGLE ──
+window.toggleEdit=function(){
+  isEdit=!isEdit;
+  document.body.classList.toggle('readonly',!isEdit);
+  document.getElementById('lock-btn').textContent=isEdit?'🔓':'🔒';
+  toast(isEdit?'✏️ Modifica abilitata':'🔒 Sola lettura');
+};
+
+// ── MAIN TAB SWITCH ──
+window.switchMainTab=function(tab,btn){
+  document.querySelectorAll('.main-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.main-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`panel-${tab}`).classList.add('active');
+  if(tab==='tracker'&&!trackerLoaded){trackerLoaded=true;loadTracker();}
+  else if(tab==='tracker') renderTracker();
+};
+
+// ── STATS ──
+function renderStats(){
+  const arr=Object.values(allTasks);
+  const total=arr.length, done=arr.filter(t=>t.status==='done').length;
+  const subs=arr.flatMap(t=>Object.values(t.subtasks||{}));
+  const totalS=subs.length, doneS=subs.filter(s=>s.status==='done').length;
+  const pct=total+totalS>0?Math.round((done+doneS)/(total+totalS)*100):0;
+  document.getElementById('stats-bar').innerHTML=`
+    <div class="stat"><div class="stat-label">Task</div><div class="stat-num">${total}</div></div>
+    <div class="stat"><div class="stat-label">Sub-task</div><div class="stat-num">${totalS}</div></div>
+    <div class="stat"><div class="stat-label">Completate</div><div class="stat-num hl">${done+doneS}</div></div>
+    <div class="stat"><div class="stat-label">Progresso</div><div class="stat-num hl">${pct}%</div>
+      <div class="stat-bar-inner"><div class="stat-bar-fill" style="width:${pct}%"></div></div></div>`;
+}
+
+// ── TASKS ──
+function renderTasks(){
+  const order={inprogress:0,todo:1,incomplete:2,missingfiles:3,done:4};
+  const arr=Object.entries(allTasks).sort((a,b)=>{
+    const so=(order[a[1].status]??1)-(order[b[1].status]??1);
+    return so||(a[1].createdAt||0)-(b[1].createdAt||0);
+  });
+  const el=document.getElementById('tasks-list');
+  if(arr.length===0){el.innerHTML='<div class="empty-state">📋 Nessuna task ancora.</div>';return;}
+  el.innerHTML=arr.map(([tid,t])=>taskHTML(tid,t)).join('');
+  openAcc.forEach(tid=>{
+    document.getElementById(`sp-${tid}`)?.classList.add('open');
+    document.getElementById(`eb-${tid}`)?.classList.add('open');
+    document.getElementById(`wr-${tid}`)?.classList.add('has-subtasks-open');
+  });
+  if(editingId){
+    const inp=editingId.type==='task'?`te-${editingId.tid}`:`se-${editingId.sid}`;
+    setTimeout(()=>{const e=document.getElementById(inp);if(e){e.focus();e.select();}},30);
   }
+}
 
-  // ── Firebase ────────────────────────────────────────────────
-  async function initFirebase(cfg) {
-    try {
-      const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-      const { getDatabase, ref, onValue, set, remove, push }
-        = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+function taskHTML(tid,t){
+  const subs=t.subtasks?Object.entries(t.subtasks).sort((a,b)=>(a[1].createdAt||0)-(b[1].createdAt||0)):[];
+  const sc=subs.length, dc=subs.filter(([,s])=>s.status==='done').length;
+  const isEditing=editingId?.type==='task'&&editingId?.tid===tid;
+  const labels={todo:'Da fare',inprogress:'In corso',done:'Completata',incomplete:'Incompleto',missingfiles:'File mancanti'};
+  const badgeCls={todo:'badge-todo',inprogress:'badge-inprogress',done:'badge-done',incomplete:'badge-incomplete',missingfiles:'badge-missingfiles'};
+  const date=t.createdAt?new Date(t.createdAt).toLocaleDateString('it-IT',{day:'2-digit',month:'short'}):'';
+  const expCls=`expand-btn${sc>0&&dc<sc?' has-incomplete':''}${sc>0&&dc===sc?' all-done':''}`;
+  const row=`<div class="task-item status-${t.status||'todo'}" id="ti-${tid}">
+    <button class="${expCls}" id="eb-${tid}" onclick="toggleAcc('${tid}')">
+      <span class="arrow">▶</span><span class="sub-count">${sc}</span>
+    </button>
+    ${isEditing
+      ?`<input class="task-name-edit" id="te-${tid}" value="${esc(t.name)}" onkeydown="if(event.key==='Enter')saveTaskEdit('${tid}');if(event.key==='Escape')cancelEdit()"/>`
+      :`<span class="task-name">${esc(t.name)}</span>`}
+    <div class="task-meta">
+      ${!isEditing?`<span class="status-badge ${badgeCls[t.status||'todo']}">${labels[t.status||'todo']}</span>`:''}
+      <select class="status-select" onchange="updateStatus('${tid}',this.value)">
+        <option value="todo" ${t.status==='todo'?'selected':''}>Da fare</option>
+        <option value="inprogress" ${t.status==='inprogress'?'selected':''}>In corso</option>
+        <option value="done" ${t.status==='done'?'selected':''}>Completata</option>
+        <option value="incomplete" ${t.status==='incomplete'?'selected':''}>Incompleto</option>
+        <option value="missingfiles" ${t.status==='missingfiles'?'selected':''}>File mancanti</option>
+      </select>
+      <span class="edit-only" style="display:contents">
+        ${!isEditing
+          ?`<button class="icon-btn" onclick="startTaskEdit('${tid}')">✏️</button>`
+          :`<button class="icon-btn" onclick="saveTaskEdit('${tid}')">💾</button><button class="icon-btn" onclick="cancelEdit()">✕</button>`}
+        <button class="icon-btn delete" onclick="deleteTask('${tid}')">🗑</button>
+      </span>
+      ${date?`<span class="task-date">${date}</span>`:''}
+    </div>
+  </div>`;
+  const subRows=subs.map(([sid,s])=>subHTML(tid,sid,s)).join('');
+  const panel=`<div class="subtasks-panel" id="sp-${tid}">
+    <div class="subtasks-list">${sc===0?'<div style="font-size:0.72rem;color:var(--muted)">Nessuna sub-task.</div>':subRows}</div>
+    <div class="add-subtask-row edit-only">
+      <input type="text" id="si-${tid}" placeholder="Nuova sub-task…" onkeydown="if(event.key==='Enter')addSubtask('${tid}')"/>
+      <button class="btn-sub" onclick="addSubtask('${tid}')">+ Sub-task</button>
+    </div>
+  </div>`;
+  return `<div class="task-wrapper" id="wr-${tid}">${row}${panel}</div>`;
+}
 
-      const app = initializeApp(cfg);
-      db = getDatabase(app);
-      setConnStatus('connected', '● Live');
+function subHTML(tid,sid,s){
+  const isEditing=editingId?.type==='subtask'&&editingId?.sid===sid;
+  const labels={todo:'Da fare',inprogress:'In corso',done:'Completata',incomplete:'Incompleto',missingfiles:'File mancanti'};
+  const badgeCls={todo:'badge-todo',inprogress:'badge-inprogress',done:'badge-done',incomplete:'badge-incomplete',missingfiles:'badge-missingfiles'};
+  return `<div class="subtask-item status-${s.status||'todo'}">
+    <span class="subtask-arrow">↳</span>
+    ${isEditing
+      ?`<input class="subtask-name-edit" id="se-${sid}" value="${esc(s.name)}" onkeydown="if(event.key==='Enter')saveSubEdit('${tid}','${sid}');if(event.key==='Escape')cancelEdit()"/>`
+      :`<span class="subtask-name">${esc(s.name)}</span>`}
+    <div class="task-meta">
+      ${!isEditing?`<span class="status-badge ${badgeCls[s.status||'todo']}" style="font-size:0.58rem">${labels[s.status||'todo']}</span>`:''}
+      <select class="status-select" style="font-size:0.65rem" onchange="updateSubStatus('${tid}','${sid}',this.value)">
+        <option value="todo" ${s.status==='todo'?'selected':''}>Da fare</option>
+        <option value="inprogress" ${s.status==='inprogress'?'selected':''}>In corso</option>
+        <option value="done" ${s.status==='done'?'selected':''}>Completata</option>
+        <option value="incomplete" ${s.status==='incomplete'?'selected':''}>Incompleto</option>
+        <option value="missingfiles" ${s.status==='missingfiles'?'selected':''}>File mancanti</option>
+      </select>
+      <span class="edit-only" style="display:contents">
+        ${!isEditing
+          ?`<button class="icon-btn" style="font-size:0.75rem" onclick="startSubEdit('${tid}','${sid}')">✏️</button>`
+          :`<button class="icon-btn" onclick="saveSubEdit('${tid}','${sid}')">💾</button><button class="icon-btn" onclick="cancelEdit()">✕</button>`}
+        <button class="icon-btn delete" style="font-size:0.75rem" onclick="deleteSubtask('${tid}','${sid}')">🗑</button>
+      </span>
+    </div>
+  </div>`;
+}
 
-      COMPANIES.forEach(c => {
-        onValue(ref(db, `tasks/${c.id}`), snap => {
-          allTasks[c.id] = snap.val() || {};
-          if (activeTab === c.id) renderTasks(c.id);
-          updateTabCounts();
-        }, err => {
-          setConnStatus('error', '● Errore DB');
-          console.error(err);
-        });
-      });
+window.toggleAcc=function(tid){
+  const panel=document.getElementById(`sp-${tid}`),btn=document.getElementById(`eb-${tid}`),wrap=document.getElementById(`wr-${tid}`);
+  if(!panel)return;
+  if(openAcc.has(tid)){openAcc.delete(tid);panel.classList.remove('open');btn?.classList.remove('open');wrap?.classList.remove('has-subtasks-open');}
+  else{openAcc.add(tid);panel.classList.add('open');btn?.classList.add('open');wrap?.classList.add('has-subtasks-open');setTimeout(()=>document.getElementById(`si-${tid}`)?.focus(),50);}
+};
+window.addTask=async function(){const inp=document.getElementById('task-input');const name=inp.value.trim();if(!name||!db)return;try{await window._push(`tasks/${CID}`,{name,status:'todo',createdAt:Date.now()});inp.value='';toast('Task aggiunta ✓');}catch(e){toast('Errore');}};
+window.updateStatus=async function(tid,s){if(!db)return;try{await window._set(`tasks/${CID}/${tid}/status`,s);toast('Aggiornato ✓');}catch(e){toast('Errore');}};
+window.deleteTask=async function(tid){if(!db)return;const n=Object.keys(allTasks[tid]?.subtasks||{}).length;if(!confirm(n>0?`Eliminare task e ${n} sub-task?`:'Eliminare task?'))return;try{await window._remove(`tasks/${CID}/${tid}`);openAcc.delete(tid);toast('Eliminata');}catch(e){toast('Errore');}};
+window.startTaskEdit=function(tid){editingId={type:'task',tid};renderTasks();};
+window.saveTaskEdit=async function(tid){const inp=document.getElementById(`te-${tid}`);if(!inp)return;const name=inp.value.trim();if(!name||!db)return;try{await window._set(`tasks/${CID}/${tid}/name`,name);editingId=null;toast('Modificata ✓');}catch(e){toast('Errore');}};
+window.addSubtask=async function(tid){const inp=document.getElementById(`si-${tid}`);const name=inp.value.trim();if(!name||!db)return;try{await window._push(`tasks/${CID}/${tid}/subtasks`,{name,status:'todo',createdAt:Date.now()});inp.value='';openAcc.add(tid);toast('Sub-task aggiunta ✓');}catch(e){toast('Errore');}};
+window.updateSubStatus=async function(tid,sid,s){if(!db)return;try{await window._set(`tasks/${CID}/${tid}/subtasks/${sid}/status`,s);toast('Aggiornato ✓');}catch(e){toast('Errore');}};
+window.deleteSubtask=async function(tid,sid){if(!db)return;if(!confirm('Eliminare sub-task?'))return;try{await window._remove(`tasks/${CID}/${tid}/subtasks/${sid}`);toast('Eliminata');}catch(e){toast('Errore');}};
+window.startSubEdit=function(tid,sid){editingId={type:'subtask',tid,sid};openAcc.add(tid);renderTasks();};
+window.saveSubEdit=async function(tid,sid){const inp=document.getElementById(`se-${sid}`);if(!inp)return;const name=inp.value.trim();if(!name||!db)return;try{await window._set(`tasks/${CID}/${tid}/subtasks/${sid}/name`,name);editingId=null;toast('Modificata ✓');}catch(e){toast('Errore');}};
+window.cancelEdit=function(){editingId=null;renderTasks();};
 
-      window._fbSet    = (path, val) => set(ref(db, path), val);
-      window._fbRemove = (path)      => remove(ref(db, path));
-      window._fbPush   = (path, val) => push(ref(db, path), val);
+// ── TRACKER ──
+async function loadTracker(){
+  if(!db)return;
+  try{
+    const snap=await window._get('tracker/luigi');
+    trackerData=snap.val()||{};
+  }catch(e){trackerData={};}
+  renderTracker();
+}
 
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      buildUI();
-    } catch(e) {
-      console.error(e);
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      buildUI();
-    }
-  }
+window.toggleDay=async function(profileId,typeId,dateStr){
+  if(!db)return;
+  const key=(profileId+'_'+typeId+'_'+dateStr).replace(/[^a-zA-Z0-9_]/g,'_');
+  const newVal=!trackerData[key];
+  if(newVal)trackerData[key]=true; else delete trackerData[key];
+  try{await window._set('tracker/luigi/'+key,newVal||null);renderTracker();toast(newVal?'✓ Segnato':'Rimosso');}
+  catch(e){toast('Errore: '+e.message);}
+};
+window.trackerPrev=function(){trackerMonth--;if(trackerMonth<0){trackerMonth=11;trackerYear--;}loadTracker();};
+window.trackerNext=function(){trackerMonth++;if(trackerMonth>11){trackerMonth=0;trackerYear++;}loadTracker();};
 
-  function setConnStatus(cls, txt) {
-    const el = document.getElementById('conn-status');
-    el.className = cls; el.textContent = txt;
-  }
+function renderTracker(){
+  const el=document.getElementById('tracker-content');
+  if(!el)return;
+  const todayStr=new Date().toISOString().split('T')[0];
+  const daysInMonth=new Date(trackerYear,trackerMonth+1,0).getDate();
 
-  // ── UI Build ────────────────────────────────────────────────
-  function buildUI() {
-    const tabs = document.getElementById('tabs');
-    tabs.innerHTML = COMPANIES.map(c =>
-      `<button class="tab-btn" id="tab-${c.id}" onclick="window._switchTab('${c.id}')">
-         ${c.name} <span class="tab-count" id="cnt-${c.id}">0</span>
-       </button>`
-    ).join('');
-
-    const main = document.getElementById('main-content');
-    main.innerHTML = COMPANIES.map(c =>
-      `<div class="company-panel" id="panel-${c.id}">
-         <div class="stats-bar" id="stats-${c.id}"></div>
-         <div class="add-section edit-only">
-           <input type="text" id="input-${c.id}" placeholder="Nuova task…"
-                  onkeydown="if(event.key==='Enter') window._addTask('${c.id}')"/>
-           <button class="btn-add" onclick="window._addTask('${c.id}')">+ Aggiungi</button>
-         </div>
-         <div class="tasks-list" id="list-${c.id}"></div>
-       </div>`
-    ).join('');
-
-    switchTab(COMPANIES[0].id);
-  }
-
-  function switchTab(cid) {
-    activeTab = cid;
-    applyCompanyColor(cid);
-    COMPANIES.forEach(c => {
-      document.getElementById(`tab-${c.id}`)?.classList.toggle('active', c.id === cid);
-      document.getElementById(`panel-${c.id}`)?.classList.toggle('active', c.id === cid);
+  // Calcola totali
+  const totals={};
+  PROFILES.forEach(p=>{
+    totals[p.id]={};
+    p.types.forEach(t=>{
+      let c=0;
+      for(let d=1;d<=daysInMonth;d++){
+        const ds=trackerYear+'-'+String(trackerMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+        const k=(p.id+'_'+t.id+'_'+ds).replace(/[^a-zA-Z0-9_]/g,'_');
+        if(trackerData[k])c++;
+      }
+      totals[p.id][t.id]=c;
     });
-    renderTasks(cid);
-  }
-  window._switchTab = switchTab;
+  });
 
-  function updateTabCounts() {
-    COMPANIES.forEach(c => {
-      const el = document.getElementById(`cnt-${c.id}`);
-      if (el) el.textContent = Object.keys(allTasks[c.id] || {}).length;
-    });
-  }
+  const gwlR=totals['grow_with_luigi']?.reel||0;
+  const lsR=totals['luigi_stips']?.reel||0;
+  const lsS=totals['luigi_stips']?.storia||0;
 
-  // ── Stats ───────────────────────────────────────────────────
-  function calcStats(cid) {
-    const tasks = allTasks[cid] || {};
-    const arr = Object.values(tasks);
-    let totalTasks = arr.length;
-    let doneTasks = arr.filter(t => t.status === 'done').length;
-    let totalSubs = 0, doneSubs = 0;
-    arr.forEach(t => {
-      const subs = t.subtasks ? Object.values(t.subtasks) : [];
-      totalSubs += subs.length;
-      doneSubs  += subs.filter(s => s.status === 'done').length;
-    });
-    return { totalTasks, doneTasks, totalSubs, doneSubs };
-  }
+  // Target
+  const targetLsReel=6*daysInMonth;
+  const targetLsStorie=4*daysInMonth;
+  const targetGwl=Math.floor(daysInMonth/2);
+  const pctLsR=Math.min(100,Math.round(lsR/targetLsReel*100));
+  const pctLsS=Math.min(100,Math.round(lsS/targetLsStorie*100));
+  const pctGwl=Math.min(100,Math.round(gwlR/targetGwl*100));
 
-  // ── Render ──────────────────────────────────────────────────
-  function renderTasks(cid) {
-    const tasks = allTasks[cid] || {};
-    const statusOrder = { inprogress:0, todo:1, incomplete:2, missingfiles:3, done:4 };
-    const arr = Object.entries(tasks).sort((a,b) => {
-      const so = (statusOrder[a[1].status]??1) - (statusOrder[b[1].status]??1);
-      if (so !== 0) return so;
-      return (a[1].createdAt||0) - (b[1].createdAt||0);
-    });
+  // Compenso
+  const compReel=150, compStorie=40, compGwl=gwlR>=15?15:0;
+  const compTot=compReel+compStorie+compGwl;
 
-    const { totalTasks, doneTasks, totalSubs, doneSubs } = calcStats(cid);
-    const totalItems = totalTasks + totalSubs;
-    const doneItems  = doneTasks  + doneSubs;
-    const pct = totalItems > 0 ? Math.round(doneItems / totalItems * 100) : 0;
-
-    const statsEl = document.getElementById(`stats-${cid}`);
-    if (statsEl) statsEl.innerHTML = `
-      <div class="stat">
-        <div class="stat-label">Task</div>
-        <div class="stat-num">${totalTasks}</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Sub-task</div>
-        <div class="stat-num">${totalSubs}</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Completate</div>
-        <div class="stat-num highlight">${doneItems}</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Progresso</div>
-        <div class="stat-num highlight">${pct}%</div>
-        <div class="stat-bar-inner"><div class="stat-bar-fill" style="width:${pct}%"></div></div>
-      </div>
-    `;
-
-    const listEl = document.getElementById(`list-${cid}`);
-    if (!listEl) return;
-
-    if (arr.length === 0) {
-      listEl.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div>Nessuna task ancora.</div>`;
-      return;
-    }
-
-    listEl.innerHTML = arr.map(([tid, task]) => renderTaskWrapper(cid, tid, task)).join('');
-
-    openAccordions.forEach(tid => {
-      const panel = document.getElementById(`sub-panel-${tid}`);
-      const btn   = document.getElementById(`expand-btn-${tid}`);
-      const wrap  = document.getElementById(`wrap-${tid}`);
-      if (panel) panel.classList.add('open');
-      if (btn)   btn.classList.add('open');
-      if (wrap)  wrap.classList.add('has-subtasks-open');
-    });
-
-    if (editingId) {
-      const inputId = editingId.type === 'subtask' ? `sedit-${editingId.sid}` : `tedit-${editingId.tid}`;
-      setTimeout(() => {
-        const inp = document.getElementById(inputId);
-        if (inp) { inp.focus(); inp.select(); }
-      }, 30);
-    }
-  }
-
-  function renderTaskWrapper(cid, tid, task) {
-    const subtasks = task.subtasks
-      ? Object.entries(task.subtasks).sort((a,b)=>(a[1].createdAt||0)-(b[1].createdAt||0))
-      : [];
-    const subCount = subtasks.length;
-    const doneSubs = subtasks.filter(([,s]) => s.status === 'done').length;
-    const incompleteSubs = subCount - doneSubs;
-    const isBlocked = subCount > 0 && incompleteSubs > 0 && task.status !== 'done';
-    const allDone   = subCount > 0 && doneSubs === subCount;
-    const isOpen    = openAccordions.has(tid);
-
-    const statusLabel = { todo:'Da fare', inprogress:'In corso', done:'Completata', incomplete:'Incarico incompleto', missingfiles:'File mancanti' }[task.status] || 'Da fare';
-    const badgeCls    = { todo:'badge-todo', inprogress:'badge-inprogress', done:'badge-done', incomplete:'badge-incomplete', missingfiles:'badge-missingfiles' }[task.status] || 'badge-todo';
-    const date = task.createdAt ? new Date(task.createdAt).toLocaleDateString('it-IT',{day:'2-digit',month:'short'}) : '';
-    const isEditingTask = editingId?.type === 'task' && editingId?.tid === tid;
-
-    const expandBtnCls = `expand-btn${incompleteSubs>0&&subCount>0?' has-incomplete':''}${allDone?' all-done':''}`;
-
-    const expandBtn = `
-      <button class="${expandBtnCls} ${subCount===0?'no-sub':''}" id="expand-btn-${tid}"
-              onclick="window._toggleAccordion('${tid}')"
-              title="Mostra/nascondi sub-task">
-        <span class="arrow">▶</span>
-        <span class="sub-count">${subCount}</span>
-      </button>`;
-
-    const taskRow = `
-      <div class="task-item status-${task.status||'todo'}" id="task-${tid}">
-        ${expandBtn}
-        ${isEditingTask
-          ? `<input class="task-name-edit" id="tedit-${tid}" value="${escHtml(task.name)}"
-                    onkeydown="if(event.key==='Enter') window._saveTaskEdit('${cid}','${tid}'); if(event.key==='Escape') window._cancelEdit()"/>`
-          : `<span class="task-name">${escHtml(task.name)}</span>`
-        }
-        <div class="task-meta">
-          ${!isEditingTask ? `<span class="status-badge ${badgeCls}">${statusLabel}</span>` : ''}
-          <select class="status-select" onchange="window._updateStatus('${cid}','${tid}',this.value)">
-            <option value="todo"          ${task.status==='todo'          ?'selected':''}>Da fare</option>
-            <option value="inprogress"    ${task.status==='inprogress'    ?'selected':''}>In corso</option>
-            <option value="done"          ${task.status==='done'          ?'selected':''}>Completata</option>
-            <option value="incomplete"    ${task.status==='incomplete'    ?'selected':''}>Incompleto</option>
-            <option value="missingfiles"  ${task.status==='missingfiles'  ?'selected':''}>File mancanti</option>
-          </select>
-          <span class="edit-only" style="display:contents">
-            ${!isEditingTask
-              ? `<button class="icon-btn" title="Modifica" onclick="window._startTaskEdit('${cid}','${tid}')">✏️</button>`
-              : `<button class="icon-btn" title="Salva" onclick="window._saveTaskEdit('${cid}','${tid}')">💾</button>
-                 <button class="icon-btn" title="Annulla" onclick="window._cancelEdit()">✕</button>`
-            }
-            <button class="icon-btn delete" title="Elimina" onclick="window._deleteTask('${cid}','${tid}')">🗑</button>
-          </span>
-          ${date ? `<span class="task-date">${date}</span>` : ''}
-        </div>
-      </div>`;
-
-    const subtaskRows = subtasks.map(([sid, sub]) => renderSubtaskRow(cid, tid, sid, sub)).join('');
-
-    const subPanel = `
-      <div class="subtasks-panel" id="sub-panel-${tid}">
-        <div class="subtasks-list" id="sublist-${tid}">
-          ${subCount === 0
-            ? `<div style="font-size:0.72rem;color:var(--muted);padding:0.2rem 0">Nessuna sub-task ancora.</div>`
-            : subtaskRows
-          }
-        </div>
-        <div class="add-subtask-row edit-only">
-          <input type="text" id="sub-input-${tid}" placeholder="Nuova sub-task…"
-                 onkeydown="if(event.key==='Enter') window._addSubtask('${cid}','${tid}')"/>
-          <button class="btn-sub" onclick="window._addSubtask('${cid}','${tid}')">+ Sub-task</button>
-        </div>
-      </div>`;
-
-    return `<div class="task-wrapper${isOpen?' has-subtasks-open':''}" id="wrap-${tid}">${taskRow}${subPanel}</div>`;
-  }
-
-  function renderSubtaskRow(cid, tid, sid, sub) {
-    const isEditing = editingId?.type === 'subtask' && editingId?.sid === sid;
-    const badgeCls  = { todo:'badge-todo', inprogress:'badge-inprogress', done:'badge-done', incomplete:'badge-incomplete', missingfiles:'badge-missingfiles' }[sub.status] || 'badge-todo';
-    const label     = { todo:'Da fare', inprogress:'In corso', done:'Completata', incomplete:'Incompleto', missingfiles:'File mancanti' }[sub.status] || 'Da fare';
-
-    return `
-      <div class="subtask-item status-${sub.status||'todo'}" id="subtask-${sid}">
-        <span class="subtask-arrow">↳</span>
-        ${isEditing
-          ? `<input class="subtask-name-edit" id="sedit-${sid}" value="${escHtml(sub.name)}"
-                    onkeydown="if(event.key==='Enter') window._saveSubEdit('${cid}','${tid}','${sid}'); if(event.key==='Escape') window._cancelEdit()"/>`
-          : `<span class="subtask-name">${escHtml(sub.name)}</span>`
-        }
-        <div class="task-meta">
-          ${!isEditing ? `<span class="status-badge ${badgeCls}" style="font-size:0.58rem">${label}</span>` : ''}
-          <select class="status-select" style="font-size:0.65rem;padding:0.22rem 0.45rem"
-                  onchange="window._updateSubStatus('${cid}','${tid}','${sid}',this.value)">
-            <option value="todo"         ${sub.status==='todo'         ?'selected':''}>Da fare</option>
-            <option value="inprogress"   ${sub.status==='inprogress'   ?'selected':''}>In corso</option>
-            <option value="done"         ${sub.status==='done'         ?'selected':''}>Completata</option>
-            <option value="incomplete"   ${sub.status==='incomplete'   ?'selected':''}>Incompleto</option>
-            <option value="missingfiles" ${sub.status==='missingfiles' ?'selected':''}>File mancanti</option>
-          </select>
-          <span class="edit-only" style="display:contents">
-            ${!isEditing
-              ? `<button class="icon-btn" style="font-size:0.75rem" title="Modifica" onclick="window._startSubEdit('${cid}','${tid}','${sid}')">✏️</button>`
-              : `<button class="icon-btn" style="font-size:0.75rem" title="Salva" onclick="window._saveSubEdit('${cid}','${tid}','${sid}')">💾</button>
-                 <button class="icon-btn" style="font-size:0.75rem" title="Annulla" onclick="window._cancelEdit()">✕</button>`
-            }
-            <button class="icon-btn delete" style="font-size:0.75rem" title="Elimina" onclick="window._deleteSubtask('${cid}','${tid}','${sid}')">🗑</button>
-          </span>
-        </div>
-      </div>`;
-  }
-
-  // ── Accordion ───────────────────────────────────────────────
-  window._toggleAccordion = function(tid) {
-    const panel = document.getElementById(`sub-panel-${tid}`);
-    const btn   = document.getElementById(`expand-btn-${tid}`);
-    const wrap  = document.getElementById(`wrap-${tid}`);
-    if (!panel) return;
-    if (openAccordions.has(tid)) {
-      openAccordions.delete(tid);
-      panel.classList.remove('open');
-      btn?.classList.remove('open');
-      wrap?.classList.remove('has-subtasks-open');
-    } else {
-      openAccordions.add(tid);
-      panel.classList.add('open');
-      btn?.classList.add('open');
-      wrap?.classList.add('has-subtasks-open');
-      setTimeout(() => document.getElementById(`sub-input-${tid}`)?.focus(), 50);
-    }
-  };
-
-  // ── CRUD ────────────────────────────────────────────────────
-  window._addTask = async function(cid) {
-    const inp = document.getElementById(`input-${cid}`);
-    const name = inp.value.trim();
-    if (!name) return;
-    if (!db) { toast('⚠ Database non configurato'); return; }
-    try {
-      await window._fbPush(`tasks/${cid}`, { name, status:'todo', createdAt: Date.now() });
-      inp.value = '';
-      toast('Task aggiunta ✓');
-    } catch(e) { toast('Errore: ' + e.message); }
-  };
-
-  window._updateStatus = async function(cid, tid, status) {
-    if (!db) return;
-    try {
-      await window._fbSet(`tasks/${cid}/${tid}/status`, status);
-      toast('Stato aggiornato ✓');
-    } catch(e) { toast('Errore: ' + e.message); }
-  };
-
-  window._deleteTask = async function(cid, tid) {
-    if (!db) return;
-    const task = allTasks[cid]?.[tid];
-    const subCount = task?.subtasks ? Object.keys(task.subtasks).length : 0;
-    if (!confirm(subCount > 0 ? `Eliminare questa task e le sue ${subCount} sub-task?` : 'Eliminare questa task?')) return;
-    try {
-      await window._fbRemove(`tasks/${cid}/${tid}`);
-      openAccordions.delete(tid);
-      toast('Task eliminata');
-    } catch(e) { toast('Errore: ' + e.message); }
-  };
-
-  window._startTaskEdit = function(cid, tid) { editingId = { type:'task', cid, tid }; renderTasks(cid); };
-
-  window._saveTaskEdit = async function(cid, tid) {
-    const inp = document.getElementById(`tedit-${tid}`);
-    if (!inp) return;
-    const name = inp.value.trim(); if (!name || !db) return;
-    try { await window._fbSet(`tasks/${cid}/${tid}/name`, name); editingId = null; toast('Task modificata ✓'); }
-    catch(e) { toast('Errore: ' + e.message); }
-  };
-
-  window._addSubtask = async function(cid, tid) {
-    const inp = document.getElementById(`sub-input-${tid}`);
-    const name = inp.value.trim(); if (!name) return;
-    if (!db) { toast('⚠ Database non configurato'); return; }
-    try {
-      await window._fbPush(`tasks/${cid}/${tid}/subtasks`, { name, status:'todo', createdAt: Date.now() });
-      inp.value = ''; openAccordions.add(tid);
-      toast('Sub-task aggiunta ✓');
-    } catch(e) { toast('Errore: ' + e.message); }
-  };
-
-  window._updateSubStatus = async function(cid, tid, sid, status) {
-    if (!db) return;
-    try { await window._fbSet(`tasks/${cid}/${tid}/subtasks/${sid}/status`, status); toast('Stato aggiornato ✓'); }
-    catch(e) { toast('Errore: ' + e.message); }
-  };
-
-  window._deleteSubtask = async function(cid, tid, sid) {
-    if (!db) return;
-    if (!confirm('Eliminare questa sub-task?')) return;
-    try { await window._fbRemove(`tasks/${cid}/${tid}/subtasks/${sid}`); toast('Sub-task eliminata'); }
-    catch(e) { toast('Errore: ' + e.message); }
-  };
-
-  window._startSubEdit = function(cid, tid, sid) { editingId = { type:'subtask', cid, tid, sid }; openAccordions.add(tid); renderTasks(cid); };
-
-  window._saveSubEdit = async function(cid, tid, sid) {
-    const inp = document.getElementById(`sedit-${sid}`);
-    if (!inp) return;
-    const name = inp.value.trim(); if (!name || !db) return;
-    try { await window._fbSet(`tasks/${cid}/${tid}/subtasks/${sid}/name`, name); editingId = null; toast('Sub-task modificata ✓'); }
-    catch(e) { toast('Errore: ' + e.message); }
-  };
-
-  window._cancelEdit = function() {
-    const prev = editingId; editingId = null;
-    if (prev) COMPANIES.forEach(c => { if (allTasks[c.id]?.[prev.tid]) renderTasks(c.id); });
-  };
-
-  // ── Utils ───────────────────────────────────────────────────
-  function escHtml(s) {
-    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  let toastTimer;
-  function toast(msg) {
-    const el = document.getElementById('toast');
-    el.textContent = msg; el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
-  }
-
-  // ── Boot ────────────────────────────────────────────────────
-  const cfg = {
-    apiKey: "AIzaSyAfy8G_pHz8DftywbYi4YX1k71EyrmOgxQ",
-    authDomain: "gestionale-gabriele.firebaseapp.com",
-    databaseURL: "https://gestionale-gabriele-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "gestionale-gabriele",
-  };
-  initFirebase(cfg);
-
-  // ── Tab switcher ─────────────────────────────────────────
-  window._switchMainTab = function(tab) {
-    document.querySelectorAll('.main-tab').forEach((el, i) => {
-      el.classList.toggle('active', (i===0&&tab==='tasks')||(i===1&&tab==='tracker'));
-    });
-    document.getElementById('main-tasks').classList.toggle('active', tab==='tasks');
-    document.getElementById('main-tracker').classList.toggle('active', tab==='tracker');
-    if (tab === 'tracker') renderTracker();
-  };
-
-  // ── Tracker ───────────────────────────────────────────────
-  const PROFILES = [
-    {
-      id: 'grow_with_luigi',
-      name: 'Grow With Luigi',
-      color: '#d4a017',
-      types: [
-        { id: 'post', label: '📸 Post' },
-      ]
-    },
-    {
-      id: 'luigi_stips',
-      name: 'Luigi Stips',
-      color: '#d4a017',
-      types: [
-        { id: 'reel', label: '🎬 Reel' },
-        { id: 'storia', label: '⏱ Storia' },
-      ]
-    },
-  ];
-
-  let trackerYear  = new Date().getFullYear();
-  let trackerMonth = new Date().getMonth(); // 0-based
-  let trackerData  = {}; // { 'grow_with_luigi_post_2025-07-01': true }
-
-  const MONTH_NAMES = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
-
-  async function loadTrackerData() {
-    if (!db) return;
-    const { ref, get } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
-    const snap = await get(ref(db, 'tracker/luigi'));
-    trackerData = snap.val() || {};
-    renderTracker();
-  }
-
-  async function toggleDay(profileId, typeId, dateStr) {
-    if (!db) return;
-    const key = profileId + '_' + typeId + '_' + dateStr;
-    const newVal = !trackerData[key];
-    trackerData[key] = newVal;
-    if (!newVal) delete trackerData[key];
-    await window._fbSet('tracker/luigi/' + key.replace(/[^a-zA-Z0-9_]/g, '_'), newVal || null);
-    renderTracker();
-    toast(newVal ? '✓ Pubblicazione segnata' : 'Pubblicazione rimossa');
-  }
-  window._toggleDay = toggleDay;
-
-  function getDaysInMonth(year, month) {
-    return new Date(year, month + 1, 0).getDate();
-  }
-
-  function renderTracker() {
-    const el = document.getElementById('tracker-content');
-    if (!el) return;
-
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    const daysInMonth = getDaysInMonth(trackerYear, trackerMonth);
-    const isCurrentMonth = today.getFullYear()===trackerYear && today.getMonth()===trackerMonth;
-
-    // Calcola totali mese
-    let totalByProfile = {};
-    PROFILES.forEach(p => {
-      totalByProfile[p.id] = {};
-      p.types.forEach(t => {
-        let count = 0;
-        for (let d=1; d<=daysInMonth; d++) {
-          const dateStr = trackerYear + '-' + String(trackerMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-          const key = p.id + '_' + t.id + '_' + dateStr;
-          const safeKey = key.replace(/[^a-zA-Z0-9_]/g, '_');
-          if (trackerData[safeKey]) count++;
-        }
-        totalByProfile[p.id][t.id] = count;
-      });
-    });
-
-    const profilesHTML = PROFILES.map(p => {
-      const typesHTML = p.types.map(t => {
-        const daysHTML = Array.from({length: daysInMonth}, (_, i) => {
-          const d = i + 1;
-          const dateStr = trackerYear + '-' + String(trackerMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-          const key = (p.id + '_' + t.id + '_' + dateStr).replace(/[^a-zA-Z0-9_]/g, '_');
-          const published = !!trackerData[key];
-          const isToday = dateStr === todayStr;
-          const isFuture = dateStr > todayStr;
-          let cls = 'day-btn';
-          if (published) cls += ' published';
-          if (isToday) cls += ' today';
-          if (isFuture) cls += ' future';
-          return `<button class="${cls}" onclick="window._toggleDay('${p.id}','${t.id}','${dateStr}')" title="${dateStr}">${d}</button>`;
-        }).join('');
-
-        return `<div class="content-type-row">
-          <span class="content-type-label">${t.label}</span>
-          <div class="days-grid">${daysHTML}</div>
-        </div>`;
+  // Profili HTML
+  const profilesHTML=PROFILES.map(p=>{
+    const typesHTML=p.types.map(t=>{
+      const daysHTML=Array.from({length:daysInMonth},(_,i)=>{
+        const d=i+1;
+        const ds=trackerYear+'-'+String(trackerMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+        const k=(p.id+'_'+t.id+'_'+ds).replace(/[^a-zA-Z0-9_]/g,'_');
+        const pub=!!trackerData[k];
+        const isToday=ds===todayStr,isFuture=ds>todayStr;
+        let cls='day-btn';
+        if(pub)cls+=' published';
+        if(isToday)cls+=' today';
+        if(isFuture)cls+=' future';
+        return `<button class="${cls}" onclick="toggleDay('${p.id}','${t.id}','${ds}')" title="${ds}">${d}</button>`;
       }).join('');
-
-      const statsHTML = p.types.map(t =>
-        `<span class="profile-stat">${t.label}: <span>${totalByProfile[p.id][t.id]}</span></span>`
-      ).join('');
-
-      return `<div class="profile-block">
-        <div class="profile-block-header">
-          <span class="profile-name">${p.name}</span>
-          <div class="profile-stats">${statsHTML}</div>
-        </div>
-        <div class="profile-content-types">${typesHTML}</div>
-      </div>`;
+      return `<div class="content-type-row"><span class="content-type-label">${t.label}</span><div class="days-grid">${daysHTML}</div></div>`;
     }).join('');
+    const statsHTML=p.types.map(t=>`<span class="profile-stat-pill">${t.label}: <span>${totals[p.id][t.id]}</span></span>`).join('');
+    return `<div class="profile-block">
+      <div class="profile-block-header"><span class="profile-block-name">${esc(p.name)}</span><div class="profile-block-stats">${statsHTML}</div></div>
+      <div>${typesHTML}</div>
+    </div>`;
+  }).join('');
 
-    // Totale generale del mese
-    let grandTotal = 0;
-    PROFILES.forEach(p => p.types.forEach(t => { grandTotal += totalByProfile[p.id][t.id]; }));
-    const gwlTotal = (totalByProfile['grow_with_luigi']?.post || 0);
-    const lsReels  = (totalByProfile['luigi_stips']?.reel || 0);
-    const lsStorie = (totalByProfile['luigi_stips']?.storia || 0);
+  el.innerHTML=`
+    <div class="tracker-header">
+      <span class="tracker-title">📅 ${MONTHS[trackerMonth]} ${trackerYear}</span>
+      <div class="tracker-month-nav">
+        <button onclick="trackerPrev()">‹</button>
+        <span class="tracker-month-label">${MONTHS[trackerMonth]} ${trackerYear}</span>
+        <button onclick="trackerNext()">›</button>
+      </div>
+    </div>
 
-    el.innerHTML = `
-      <div class="tracker-section">
-        <div class="tracker-header">
-          <span class="tracker-title">📅 Pubblicazioni — ${MONTH_NAMES[trackerMonth]} ${trackerYear}</span>
-          <div class="tracker-month-nav">
-            <button class="month-btn" onclick="window._prevMonth()">‹</button>
-            <span class="month-label">${MONTH_NAMES[trackerMonth]} ${trackerYear}</span>
-            <button class="month-btn" onclick="window._nextMonth()">›</button>
-          </div>
-        </div>
-        <div class="tracker-profiles">${profilesHTML}</div>
-        <div class="tracker-summary">
-          <div class="summary-card"><div class="summary-card-label">Totale contenuti</div><div class="summary-card-num">${grandTotal}</div></div>
-          <div class="summary-card"><div class="summary-card-label">Grow With Luigi — Post</div><div class="summary-card-num">${gwlTotal}</div></div>
-          <div class="summary-card"><div class="summary-card-label">Luigi Stips — Reels</div><div class="summary-card-num">${lsReels}</div></div>
-          <div class="summary-card"><div class="summary-card-label">Luigi Stips — Storie</div><div class="summary-card-num">${lsStorie}</div></div>
-        </div>
-      </div>`;
-  }
+    <div class="tracker-profiles">${profilesHTML}</div>
 
-  window._prevMonth = function() {
-    trackerMonth--;
-    if (trackerMonth < 0) { trackerMonth = 11; trackerYear--; }
-    loadTrackerData();
-  };
-  window._nextMonth = function() {
-    trackerMonth++;
-    if (trackerMonth > 11) { trackerMonth = 0; trackerYear++; }
-    loadTrackerData();
-  };
+    <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:0.6rem;">Progresso target mensile</div>
+    <div class="target-grid">
+      <div class="target-card">
+        <div class="target-label">LS · Reel <span style="color:var(--muted);font-weight:400">/ ${targetLsReel}</span></div>
+        <div class="target-num">${lsR}</div>
+        <div class="progress-row"><div class="progress-fill" style="width:${pctLsR}%;background:var(--yellow)"></div></div>
+        <div class="target-sub">${targetLsReel-lsR>0?`${targetLsReel-lsR} mancanti`:'✓ Target raggiunto'}</div>
+      </div>
+      <div class="target-card">
+        <div class="target-label">LS · Storie <span style="color:var(--muted);font-weight:400">/ ${targetLsStorie}</span></div>
+        <div class="target-num">${lsS}</div>
+        <div class="progress-row"><div class="progress-fill" style="width:${pctLsS}%;background:var(--green)"></div></div>
+        <div class="target-sub">${targetLsStorie-lsS>0?`${targetLsStorie-lsS} mancanti`:'✓ Target raggiunto'}</div>
+      </div>
+      <div class="target-card">
+        <div class="target-label">GWL · Reel <span style="color:var(--muted);font-weight:400">/ ${targetGwl}</span></div>
+        <div class="target-num">${gwlR}</div>
+        <div class="progress-row"><div class="progress-fill" style="width:${pctGwl}%;background:var(--accent2)"></div></div>
+        <div class="target-sub">${targetGwl-gwlR>0?`${targetGwl-gwlR} mancanti`:'✓ Target raggiunto'}</div>
+      </div>
+    </div>
 
-  // Carica tracker al boot
-  setTimeout(() => loadTrackerData(), 2000);
+    <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:0.6rem;">Compenso mese</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:2rem;">
+      <div class="compenso-row">
+        <div><div class="compenso-label">🎬 Reel Luigi Stips</div><div class="compenso-sub">6/giorno · fisso mensile</div></div>
+        <span class="compenso-amt">+€150</span>
+      </div>
+      <div class="compenso-row">
+        <div><div class="compenso-label">⏱ Storie Luigi Stips</div><div class="compenso-sub">4/giorno · fisso mensile</div></div>
+        <span class="compenso-amt">+€40</span>
+      </div>
+      <div class="compenso-row">
+        <div><div class="compenso-label">🎬 Reel Grow With Luigi</div><div class="compenso-sub">≥15/mese · ${gwlR} pubblicati</div></div>
+        <span class="compenso-amt ${compGwl>0?'':'zero'}">${compGwl>0?'+€15':'€0 — non raggiunto'}</span>
+      </div>
+      <div class="compenso-row" style="background:var(--surface2)">
+        <span style="font-size:0.9rem;font-weight:700">Totale</span>
+        <span class="compenso-total">+€${compTot}</span>
+      </div>
+    </div>`;
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+let toastT;
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),2200);}
+
+init();
 </script>
 </body>
 </html>
