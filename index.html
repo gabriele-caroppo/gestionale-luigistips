@@ -1306,26 +1306,26 @@
           if (published) cls += ' published';
           if (isToday) cls += ' today';
           if (isFuture) cls += ' future';
-          return \`<button class="\${cls}" onclick="window._toggleDay('\${p.id}','\${t.id}','\${dateStr}')" title="\${dateStr}">\${d}</button>\`;
+          return `<button class="${cls}" onclick="window._toggleDay('${p.id}','${t.id}','${dateStr}')" title="${dateStr}">${d}</button>`;
         }).join('');
 
-        return \`<div class="content-type-row">
-          <span class="content-type-label">\${t.label}</span>
-          <div class="days-grid">\${daysHTML}</div>
-        </div>\`;
+        return `<div class="content-type-row">
+          <span class="content-type-label">${t.label}</span>
+          <div class="days-grid">${daysHTML}</div>
+        </div>`;
       }).join('');
 
       const statsHTML = p.types.map(t =>
-        \`<span class="profile-stat">\${t.label}: <span>\${totalByProfile[p.id][t.id]}</span></span>\`
+        `<span class="profile-stat">${t.label}: <span>${totalByProfile[p.id][t.id]}</span></span>`
       ).join('');
 
-      return \`<div class="profile-block">
+      return `<div class="profile-block">
         <div class="profile-block-header">
-          <span class="profile-name">\${p.name}</span>
-          <div class="profile-stats">\${statsHTML}</div>
+          <span class="profile-name">${p.name}</span>
+          <div class="profile-stats">${statsHTML}</div>
         </div>
-        <div class="profile-content-types">\${typesHTML}</div>
-      </div>\`;
+        <div class="profile-content-types">${typesHTML}</div>
+      </div>`;
     }).join('');
 
     // Totale generale del mese
@@ -1335,24 +1335,24 @@
     const lsReels  = (totalByProfile['luigi_stips']?.reel || 0);
     const lsStorie = (totalByProfile['luigi_stips']?.storia || 0);
 
-    el.innerHTML = \`
+    el.innerHTML = `
       <div class="tracker-section">
         <div class="tracker-header">
-          <span class="tracker-title">📅 Pubblicazioni — \${MONTH_NAMES[trackerMonth]} \${trackerYear}</span>
+          <span class="tracker-title">📅 Pubblicazioni — ${MONTH_NAMES[trackerMonth]} ${trackerYear}</span>
           <div class="tracker-month-nav">
             <button class="month-btn" onclick="window._prevMonth()">‹</button>
-            <span class="month-label">\${MONTH_NAMES[trackerMonth]} \${trackerYear}</span>
+            <span class="month-label">${MONTH_NAMES[trackerMonth]} ${trackerYear}</span>
             <button class="month-btn" onclick="window._nextMonth()">›</button>
           </div>
         </div>
-        <div class="tracker-profiles">\${profilesHTML}</div>
+        <div class="tracker-profiles">${profilesHTML}</div>
         <div class="tracker-summary">
-          <div class="summary-card"><div class="summary-card-label">Totale contenuti</div><div class="summary-card-num">\${grandTotal}</div></div>
-          <div class="summary-card"><div class="summary-card-label">Grow With Luigi — Post</div><div class="summary-card-num">\${gwlTotal}</div></div>
-          <div class="summary-card"><div class="summary-card-label">Luigi Stips — Reels</div><div class="summary-card-num">\${lsReels}</div></div>
-          <div class="summary-card"><div class="summary-card-label">Luigi Stips — Storie</div><div class="summary-card-num">\${lsStorie}</div></div>
+          <div class="summary-card"><div class="summary-card-label">Totale contenuti</div><div class="summary-card-num">${grandTotal}</div></div>
+          <div class="summary-card"><div class="summary-card-label">Grow With Luigi — Post</div><div class="summary-card-num">${gwlTotal}</div></div>
+          <div class="summary-card"><div class="summary-card-label">Luigi Stips — Reels</div><div class="summary-card-num">${lsReels}</div></div>
+          <div class="summary-card"><div class="summary-card-label">Luigi Stips — Storie</div><div class="summary-card-num">${lsStorie}</div></div>
         </div>
-      </div>\`;
+      </div>`;
   }
 
   window._prevMonth = function() {
