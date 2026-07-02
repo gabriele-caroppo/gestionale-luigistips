@@ -428,10 +428,16 @@ function renderTracker(){
   const todayStr=new Date().toISOString().split('T')[0];
   const daysInMonth=new Date(trackerYear,trackerMonth+1,0).getDate();
 
-  // Calcola totali
+  // Moltiplicatori per tipo contenuto
+  const MULT={'luigi_stips_reel':6,'luigi_stips_storia':4,'grow_with_luigi_reel':1};
+  function getMult(pid,tid){return MULT[pid+'_'+tid]||1;}
+
+  // Calcola totali (giorni cliccati * moltiplicatore)
   const totals={};
+  const giorni={}; // giorni effettivi cliccati (per display calendario)
   PROFILES.forEach(p=>{
     totals[p.id]={};
+    giorni[p.id]={};
     p.types.forEach(t=>{
       let c=0;
       for(let d=1;d<=daysInMonth;d++){
@@ -439,7 +445,8 @@ function renderTracker(){
         const k=(p.id+'_'+t.id+'_'+ds).replace(/[^a-zA-Z0-9_]/g,'_');
         if(trackerData[k])c++;
       }
-      totals[p.id][t.id]=c;
+      giorni[p.id][t.id]=c;
+      totals[p.id][t.id]=c*getMult(p.id,t.id);
     });
   });
 
@@ -476,7 +483,11 @@ function renderTracker(){
       }).join('');
       return `<div class="content-type-row"><span class="content-type-label">${t.label}</span><div class="days-grid">${daysHTML}</div></div>`;
     }).join('');
-    const statsHTML=p.types.map(t=>`<span class="profile-stat-pill">${t.label}: <span>${totals[p.id][t.id]}</span></span>`).join('');
+    const statsHTML=p.types.map(t=>{
+      const m=getMult(p.id,t.id);
+      const sub=m>1?' ('+m+'/g)':'';
+      return '<span class="profile-stat-pill">'+t.label+sub+': <span>'+totals[p.id][t.id]+'</span></span>';
+    }).join('');
     return `<div class="profile-block">
       <div class="profile-block-header"><span class="profile-block-name">${esc(p.name)}</span><div class="profile-block-stats">${statsHTML}</div></div>
       <div>${typesHTML}</div>
@@ -528,8 +539,8 @@ function renderTracker(){
         <span class="compenso-amt">+€40</span>
       </div>
       <div class="compenso-row">
-        <div><div class="compenso-label">🎬 Reel Grow With Luigi</div><div class="compenso-sub">≥15/mese · ${gwlR} pubblicati</div></div>
-        <span class="compenso-amt ${compGwl>0?'':'zero'}">${compGwl>0?'+€15':'€0 — non raggiunto'}</span>
+        <div><div class="compenso-label">🎬 Reel Grow With Luigi</div><div class="compenso-sub">1 ogni 2 gg · ${gwlR} reel pubblicati · target ≥15</div></div>
+        <span class="compenso-amt ${compGwl>0?'':'zero'}">${compGwl>0?'+€15 (fisso)':'€0 — non raggiunto ('+gwlR+'/15)'}</span>
       </div>
       <div class="compenso-row" style="background:var(--surface2)">
         <span style="font-size:0.9rem;font-weight:700">Totale</span>
