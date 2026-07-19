@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>DYRECTIO · Luigi Stips</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:opsz,wght@12..72,400;12..72,500;12..72,600;12..72,700&display=swap');
@@ -419,7 +419,8 @@ header{
 /* ── Bottom nav mobile: capsula di vetro fluttuante ── */
 @media(max-width:760px){
   #bottom-nav{
-    left:12px;right:12px;bottom:12px;
+    left:12px;right:12px;
+    bottom:calc(env(safe-area-inset-bottom) + 10px);
     border-radius:28px;
     background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02)),rgba(9,8,13,.6);
     backdrop-filter:blur(34px) saturate(1.9);
@@ -432,8 +433,9 @@ header{
   .bn-item.active::before{background:color-mix(in srgb,var(--company-color) 20%,transparent)}
   .bn-item.active{color:var(--company-color)}
   #main{padding-bottom:0}
-  .page,.main-panel,main{padding-bottom:128px}
-  #fab-add{bottom:calc(96px + env(safe-area-inset-bottom))}
+  .page,.main-panel,main{padding-top:calc(env(safe-area-inset-top) + 20px);padding-bottom:calc(env(safe-area-inset-bottom) + 118px)}
+  #fab-add{bottom:calc(env(safe-area-inset-bottom) + 84px)}
+  #toast{bottom:calc(env(safe-area-inset-bottom) + 92px)}
 }
 
 /* ── Streak / calendario: leggero effetto vetro sulle celle attive ── */
