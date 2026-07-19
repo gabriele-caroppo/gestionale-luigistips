@@ -299,10 +299,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 
 <script type="module">
 const CID = 'luigi_luigi';
+// Grow With Luigi rimosso da luglio 2026
 const PROFILES = [
-  {id:'grow_with_luigi', name:'Grow With Luigi', types:[
-    {id:'reel', label:'🎬 Reel'},
-  ]},
   {id:'luigi_stips', name:'Luigi Stips', types:[
     {id:'reel',   label:'🎬 Reel'},
     {id:'storia', label:'⏱ Storia'},
@@ -502,7 +500,7 @@ function renderTracker(){
   const daysInMonth=new Date(trackerYear,trackerMonth+1,0).getDate();
 
   // Moltiplicatori per tipo contenuto
-  const MULT={'luigi_stips_reel':6,'luigi_stips_storia':4,'grow_with_luigi_reel':1};
+  const MULT={'luigi_stips_reel':6,'luigi_stips_storia':4};
   function getMult(pid,tid){return MULT[pid+'_'+tid]||1;}
 
   // Calcola totali (giorni cliccati * moltiplicatore)
@@ -523,21 +521,18 @@ function renderTracker(){
     });
   });
 
-  const gwlR=totals['grow_with_luigi']?.reel||0;
   const lsR=totals['luigi_stips']?.reel||0;
   const lsS=totals['luigi_stips']?.storia||0;
 
   // Target
   const targetLsReel=6*daysInMonth;
   const targetLsStorie=4*daysInMonth;
-  const targetGwl=Math.floor(daysInMonth/2);
   const pctLsR=Math.min(100,Math.round(lsR/targetLsReel*100));
   const pctLsS=Math.min(100,Math.round(lsS/targetLsStorie*100));
-  const pctGwl=Math.min(100,Math.round(gwlR/targetGwl*100));
 
   // Compenso
-  const compReel=150, compStorie=40, compGwl=gwlR>=15?15:0;
-  const compTot=compReel+compStorie+compGwl;
+  const compReel=150, compStorie=40;
+  const compTot=compReel+compStorie;
 
   // Profili HTML
   const profilesHTML=PROFILES.map(p=>{
@@ -593,12 +588,6 @@ function renderTracker(){
         <div class="progress-row"><div class="progress-fill" style="width:${pctLsS}%;background:var(--green)"></div></div>
         <div class="target-sub">${targetLsStorie-lsS>0?`${targetLsStorie-lsS} mancanti`:'✓ Target raggiunto'}</div>
       </div>
-      <div class="target-card">
-        <div class="target-label">GWL · Reel <span style="color:var(--muted);font-weight:400">/ ${targetGwl}</span></div>
-        <div class="target-num">${gwlR}</div>
-        <div class="progress-row"><div class="progress-fill" style="width:${pctGwl}%;background:var(--accent2)"></div></div>
-        <div class="target-sub">${targetGwl-gwlR>0?`${targetGwl-gwlR} mancanti`:'✓ Target raggiunto'}</div>
-      </div>
     </div>
 
     <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:0.6rem;">Compenso mese</div>
@@ -610,10 +599,6 @@ function renderTracker(){
       <div class="compenso-row">
         <div><div class="compenso-label">⏱ Storie Luigi Stips</div><div class="compenso-sub">4/giorno · fisso mensile</div></div>
         <span class="compenso-amt">+€40</span>
-      </div>
-      <div class="compenso-row">
-        <div><div class="compenso-label">🎬 Reel Grow With Luigi</div><div class="compenso-sub">1 ogni 2 gg · ${gwlR} reel pubblicati · target ≥15</div></div>
-        <span class="compenso-amt ${compGwl>0?'':'zero'}">${compGwl>0?'+€15 (fisso)':'€0 — non raggiunto ('+gwlR+'/15)'}</span>
       </div>
       <div class="compenso-row" style="background:var(--surface2)">
         <span style="font-size:0.9rem;font-weight:700">Totale</span>
